@@ -9,4 +9,7 @@ lazy val root = (project in file(".")).
     )),
     name := "Hello",
     libraryDependencies += scalaTest % Test
-  )
+
+)
+
+libraryDependencies += "com.jfoenix" % "jfoenix" % "1.3.0"
