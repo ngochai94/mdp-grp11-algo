@@ -2,10 +2,9 @@ package grp11.geometry
 
 import CellState._
 
-class Maze(cells: Array[Array[Cell]]) {
-  def height(): Int = cells.length
-  def width(): Int = cells(0).length
-}
+import scala.collection.mutable
+
+class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int)
 
 object Maze {
   val Height = 20
@@ -16,13 +15,13 @@ object Maze {
   }
 
   def apply(height: Int, width: Int): Maze = {
-    val cells = Array.ofDim[Cell](height, width)
+    val cells = mutable.HashMap[Cell, CellState]()
     for {
       row <- 1 to height
       col <- 1 to width
     }{
-      cells(row)(col) = Cell(row, col, Unknown)
+      cells(Cell(row, col)) = Unknown
     }
-    new Maze(cells)
+    new Maze(cells, height, width)
   }
 }
