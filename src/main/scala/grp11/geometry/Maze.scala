@@ -4,7 +4,11 @@ import CellState._
 
 import scala.collection.mutable
 
-class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int)
+class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
+  def containsCell(cell: Cell): Boolean = cells.contains(cell)
+  def getState(cell: Cell): CellState = cells(cell)
+  def setState(cell: Cell, cellState: CellState): Unit = cells(cell) = cellState
+}
 
 object Maze {
   val Height = 20
