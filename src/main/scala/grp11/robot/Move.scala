@@ -6,4 +6,6 @@ object Move {
   case object Forward extends Move
   case object TurnLeft extends Move
   case object TurnRight extends Move
+
+  val all = List(Forward, TurnLeft, TurnRight)
 }

@@ -32,4 +32,6 @@ object Orientation {
     override def turnRight: Orientation = Down
     override def turnBack: Orientation = Left
   }
+
+  val all = List(Up, Down, Left, Right)
 }
