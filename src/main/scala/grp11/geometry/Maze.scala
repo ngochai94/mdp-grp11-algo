@@ -12,7 +12,7 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
 
   def isValidPosition(position: RobotPosition): Boolean = {
     val center = position.center
-    if (!(center.x > 1 && center.x < height && center.y > 1 && center.y < width)) {
+    if (!(center.x > 1 && center.x < width && center.y > 1 && center.y < height)) {
       false
     } else {
       val cellsUnder = for {
@@ -24,6 +24,20 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
       }
       !cellsUnder.contains(false)
     }
+  }
+
+  def draw(path: List[RobotPosition] = Nil): String = {
+    (1 to height).toList.reverse.map { row =>
+      (1 to width).foldLeft("") { case (s, col) =>
+        val symbol = cells(Cell(col, row)) match {
+          case _ if path.exists(_.center == Cell(col, row)) => "o"
+          case Unknown => "?"
+          case Empty => "."
+          case Blocked => "x"
+        }
+        s ++ symbol
+      }
+    }.mkString("\n")
   }
 }
 
@@ -41,7 +55,7 @@ object Maze {
       row <- 1 to height
       col <- 1 to width
     }{
-      cells(Cell(row, col)) = Unknown
+      cells(Cell(col, row)) = Unknown
     }
     new Maze(cells, height, width)
   }
