@@ -4,7 +4,7 @@ import grp11.geometry.CellState.Blocked
 import grp11.geometry.{Cell, Maze}
 import grp11.robot.Orientation.Up
 
-case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor]) extends Robot {
+case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTime: Int) extends Robot {
   val perceivedMaze = Maze()
   var position = RobotPosition(Cell(2, 2), Up)
 
@@ -23,7 +23,17 @@ case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor]) extends Robot {
     }.map(cell => perceivedMaze.setState(cell, finalMaze.getState(cell)))
   }
 
-  override def move(move: Move): Unit = position.applyMove(move)
+  override def move(move: Move): Unit = {
+    position.applyMove(move)
+    move match {
+      case Move.Forward => Thread.sleep(moveTime)
+      case _ => Thread.sleep(turnTime)
+    }
+  }
 
   override def getPerceivedMaze: Maze = perceivedMaze
+
+  override def setPosition(newPosition: RobotPosition): Unit = {
+    position = newPosition
+  }
 }

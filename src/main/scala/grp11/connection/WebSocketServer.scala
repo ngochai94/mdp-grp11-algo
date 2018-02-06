@@ -1,7 +1,7 @@
 package grp11.connection
 
 import akka.NotUsed
-import akka.stream.{ActorMaterializer, ClosedShape, FlowShape}
+import akka.stream.{ActorMaterializer, FlowShape}
 import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Source}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.ws.{Message, TextMessage, UpgradeToWebSocket}
