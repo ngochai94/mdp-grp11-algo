@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Cell from './Cell';
-import './Board.css'
+import Robot from './Robot';
+import './Board.css';
 
 export default class Board extends Component {
   constructor(props) {
@@ -45,71 +46,84 @@ export default class Board extends Component {
       }
     }
 
+    const robot = this.props.robotX ? (
+      <Robot
+        x = {this.props.robotX}
+        y = {this.props.robotY}
+        rotate = {this.props.rotate}
+    />) : null;
+
     return (
       <div
         className='Board'
         onMouseLeave = {this._onBoardLeave}
       >
         {cells}
+        {robot}
       </div>
     );
   }
 
   _onCellClick(e, row, col) {
     e.preventDefault();
-    // console.log("click " + row + ' ' + col);
-    this.setState((prevState) => {
-      let cells = JSON.parse(JSON.stringify(prevState.cells))
-      cells[[row, col]] = -cells[[row, col]];
-      return {
-        tmpCells: cells,
-        startRow: row,
-        startCol: col,
-      };
-    });
-  }
-
-  _onCellRelease(e) {
-    e.preventDefault();
-    // console.log("release " + row + ' ' + col);
-    if (this.state.startCol !== -1) {
-      this.setState((prevState) => ({
-        cells: JSON.parse(JSON.stringify(prevState.tmpCells)),
-      }));
-    }
-    this.setState({
-      startRow: -1,
-      startCol: -1,
-    });
-  }
-
-  _onCellEnter(e, row, col) {
-    e.preventDefault();
-    if (this.state.startCol !== -1) {
-      // console.log("enter " + row + ' ' + col, this);
-      let newCells = JSON.parse(JSON.stringify(this.state.cells));
-      for (let r = Math.min(row, this.state.startRow); r <= Math.max(row, this.state.startRow); r++) {
-        for (let c = Math.min(col, this.state.startCol); c <= Math.max(col, this.state.startCol); c++) {
-          newCells[[r, c]] = -newCells[[r, c]];
-        }
-      }
-      this.setState({
-        tmpCells: newCells,
+    if (this.props.selectable) {
+      this.setState((prevState) => {
+        let cells = JSON.parse(JSON.stringify(prevState.cells))
+        cells[[row, col]] = -cells[[row, col]];
+        return {
+          tmpCells: cells,
+          startRow: row,
+          startCol: col,
+        };
       });
     }
   }
 
+  _onCellRelease(e) {
+    e.preventDefault();
+    if (this.props.selectable) {
+      if (this.state.startCol !== -1) {
+        this.setState((prevState) => ({
+          cells: JSON.parse(JSON.stringify(prevState.tmpCells)),
+        }));
+      }
+      this.setState({
+        startRow: -1,
+        startCol: -1,
+      });
+    }
+  }
+
+  _onCellEnter(e, row, col) {
+    e.preventDefault();
+    if (this.props.selectable) {
+      if (this.state.startCol !== -1) {
+        let newCells = JSON.parse(JSON.stringify(this.state.cells));
+        for (let r = Math.min(row, this.state.startRow); r <= Math.max(row, this.state.startRow); r++) {
+          for (let c = Math.min(col, this.state.startCol); c <= Math.max(col, this.state.startCol); c++) {
+            newCells[[r, c]] = -newCells[[r, c]];
+          }
+        }
+        this.setState({
+          tmpCells: newCells,
+        });
+      }
+    }
+  }
+
   _onBoardLeave() {
-    // console.log("leave board");
-    this.setState((prevState) => ({
-      tmpCells: JSON.parse(JSON.stringify(prevState.cells)),
-      startRow: -1,
-      startCol: -1,
-    }));
+    if (this.props.selectable) {
+      this.setState((prevState) => ({
+        tmpCells: JSON.parse(JSON.stringify(prevState.cells)),
+        startRow: -1,
+        startCol: -1,
+      }));
+    }
   }
 }
 
 Board.defaultProps = {
   height: 20,
   width: 15,
+  selectable: false,
 };
