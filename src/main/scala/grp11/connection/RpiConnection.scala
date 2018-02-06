@@ -1,10 +1,11 @@
-package grp11.remote
+package grp11.connection
 
 import java.net._
 import java.io._
 
 case class RpiConnection(host: String, port: Int) {
   val s = new Socket(InetAddress.getByName(host), port)
+  println("Connected!")
   val in = new DataInputStream(s.getInputStream)
   val out = new PrintStream(s.getOutputStream)
 
@@ -23,7 +24,7 @@ case class RpiConnection(host: String, port: Int) {
 }
 
 object RpiConnection {
-  val DefaultHost = "192.168.200.11"
+  val DefaultHost = "172.21.147.242"
   val DefaultPort = 8080
   val MaxLength = 1024
 }

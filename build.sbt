@@ -9,9 +9,8 @@ lazy val root = (project in file(".")).
     )),
     name := "MDP",
     libraryDependencies += scalaTest % Test
-
 )
 
-libraryDependencies += "com.jfoenix" % "jfoenix" % "1.3.0"
-libraryDependencies += "org.scalafx" % "scalafx_2.12" % "8.0.144-R12"
-
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.16"
+libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.0.11"
+libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.9"
