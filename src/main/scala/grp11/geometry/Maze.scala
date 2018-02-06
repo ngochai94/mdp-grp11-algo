@@ -2,6 +2,7 @@ package grp11.geometry
 
 import CellState._
 import grp11.robot.RobotPosition
+import grp11.utils.Utils
 
 import scala.collection.mutable
 
@@ -26,6 +27,8 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
     }
   }
 
+  def getCoverage: Int = cells.values.filter(_ == Empty).toList.length
+
   def draw(path: List[RobotPosition] = Nil): String = {
     (1 to height).toList.reverse.map { row =>
       (1 to width).foldLeft("") { case (s, col) =>
@@ -38,6 +41,33 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
         s ++ symbol
       }
     }.mkString("\n")
+  }
+
+  def encodeExplored: String = {
+    val exploredBin = List(1, 1) ++ (1 to height).toList.flatMap { row =>
+      (1 to width).toList.map { col =>
+        cells(Cell(col, row)) match {
+          case Unknown => 0
+          case _ => 1
+        }
+      }
+    } ++ List(1, 1)
+    Utils.bins2Hexs(exploredBin)
+  }
+
+  def encodeState: String = {
+    val stateBin = (1 to height).toList.flatMap { row =>
+      (1 to width).toList.map { col =>
+        cells(Cell(col, row)) match {
+          case Unknown => -1
+          case Empty => 0
+          case Blocked => 1
+        }
+      }
+    }.filter(_ >= 0)
+    val padding = (8 - stateBin.length % 8) % 8
+    val paddedStateBin = stateBin ++ List.fill(padding)(0)
+    Utils.bins2Hexs(paddedStateBin)
   }
 }
 
