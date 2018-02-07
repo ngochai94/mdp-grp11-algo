@@ -14,3 +14,4 @@ lazy val root = (project in file(".")).
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.16"
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.0.11"
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.9"
+libraryDependencies += "com.google.code.gson" % "gson" % "1.7.1"
