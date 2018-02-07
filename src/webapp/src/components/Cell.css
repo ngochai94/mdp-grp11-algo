@@ -10,9 +10,11 @@
 }
 
 .cell.blocked {
-    background-color: red;
+    background-color: #F7CA18;
+    /*background-color: #ABB7B7;*/
 }
 
 .cell.empty {
-    background-color: aqua;
+    background-color: #22A7F0;
+    /*background-color: #F7CA18;*/
 }

@@ -6,17 +6,13 @@ let connected = false;
 socket.on('connect', () => {
   console.log('connected');
   connected = true;
-});
-
-socket.on('data', (data) => {
-  const s = new TextDecoder("utf-8").decode(data);
-  console.log(s);
+  sendHeartBeat();
 });
 
 socket.on('close', () => {
   console.log('closed');
   connected = false;
-})
+});
 
 function wait(cb) {
   if (!connected) {
@@ -27,8 +23,22 @@ function wait(cb) {
   }
 }
 
+function send(msg) {
+  wait(() => socket.send(msg));
+}
+
+function sendHeartBeat() {
+  send("");
+  setTimeout(sendHeartBeat, 10000);
+}
+
 export default {
-  send: (msg) => {
-    wait(() => socket.send(msg));
+  send,
+
+  register: (cb) => {
+    socket.on('data', (data) => {
+      const s = new TextDecoder("utf-8").decode(data);
+      cb(s);
+    });
   }
 }

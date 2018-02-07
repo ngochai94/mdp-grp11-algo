@@ -24,7 +24,7 @@ export default class Cell extends Component {
     let status = 'empty';
     if (this.props.status === 0) {
       status = 'unknown';
-    } else if (this.props.status === -1) {
+    } else if (this.props.status === 2) {
       status = 'blocked';
     }
     return status;
