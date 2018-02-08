@@ -24,7 +24,7 @@ case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, t
   }
 
   override def move(move: Move): Unit = {
-    position.applyMove(move)
+    position = position.applyMove(move)
     move match {
       case Move.Forward => Thread.sleep(moveTime)
       case _ => Thread.sleep(turnTime)

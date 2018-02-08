@@ -1,5 +1,8 @@
 package grp11.utils
 
+import grp11.robot.Move._
+import grp11.robot.{Move, RobotPosition}
+
 object Utils {
   val hex = "0123456789ABCDEF"
 
@@ -12,4 +15,16 @@ object Utils {
       else (res + dec2Hex(agg), 0, 0)
     }._1
   }
+
+  def path2Moves(path: List[RobotPosition]): List[Move] = {
+    if (path.lengthCompare(2) < 0) Nil
+    else {
+      path.tail.foldLeft((List[Move](), path.head)) { case ((moves, lastPos), pos) =>
+        if (lastPos.applyMove(Forward) == pos) (moves :+ Forward, pos)
+        else if (lastPos.applyMove(TurnRight) == pos) (moves :+ TurnRight, pos)
+        else (moves :+ TurnLeft, pos)
+      }._1
+    }
+  }
+
 }

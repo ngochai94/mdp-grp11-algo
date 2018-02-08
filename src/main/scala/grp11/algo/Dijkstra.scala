@@ -27,12 +27,14 @@ object Dijkstra {
   def getDistanceMap(maze: Maze, start: RobotPosition, turnCost: Double): mutable.HashMap[RobotPosition, (Double, RobotPosition)] = {
     val currentMap = mutable.PriorityQueue[(Double, RobotPosition, RobotPosition)]((0.0, start, start))(Ordering.by(-_._1))
     val finalMap = mutable.HashMap[RobotPosition, (Double, RobotPosition)](start -> (0.0, start))
-    maze.cells.foreach { case (cell, _) =>
-      Orientation.all.foreach { orientation =>
-        val robotPosition = RobotPosition(cell, orientation)
-        currentMap.enqueue((Double.MaxValue, robotPosition, robotPosition))
-        finalMap(robotPosition) = (Double.MaxValue, robotPosition)
-      }
+    for {
+      (cell, _) <- maze.cells
+      orientation <- Orientation.all
+      robotPosition = RobotPosition(cell, orientation)
+      if robotPosition != start
+    } {
+      currentMap.enqueue((Double.MaxValue, robotPosition, robotPosition))
+      finalMap(robotPosition) = (Double.MaxValue, robotPosition)
     }
 
     while (currentMap.nonEmpty) {

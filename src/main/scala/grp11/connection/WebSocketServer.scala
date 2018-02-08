@@ -7,16 +7,14 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.ws.{Message, TextMessage, UpgradeToWebSocket}
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import akka.http.scaladsl.model.HttpMethods._
-import akka.actor.{ActorSystem, Props}
-
-import scala.concurrent.duration.HOURS
+import akka.actor.{ActorRef, ActorSystem, Props}
 
 
 class WebSocketServer {
   implicit val system: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  val forwarder = system.actorOf(Props[Forwarder], "router")
+  val forwarder: ActorRef = system.actorOf(Props[Forwarder], "router")
 
   def handler: Flow[Message, Message, NotUsed] = {
     Flow.fromGraph(GraphDSL.create() { implicit b: GraphDSL.Builder[NotUsed] =>
@@ -35,7 +33,7 @@ class WebSocketServer {
           ""
       })
       val filterNotEmpty = b.add(Flow[String].filter(_ != ""))
-      val mapStringToMsg = b.add(Flow[String].map[Message](TextMessage.Strict(_)))
+      val mapStringToMsg = b.add(Flow[String].map[Message](TextMessage.Strict))
       val listenerSink = Sink.actorRef(system.actorOf(Props(classOf[ListenerActor], forwarder)), "Done")
 
                                           broadcast ~> listenerSink

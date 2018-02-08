@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Board from './components/Board'
 import './App.css';
-import ShortestPathButton from "./components/ShortestPathButton";
+import Button from "./components/Button";
 import socket from './api/Api';
 
 class App extends Component {
@@ -15,6 +15,7 @@ class App extends Component {
     };
 
     this._onClickShortestPath = this._onClickShortestPath.bind(this);
+    this._onClickExplore = this._onClickExplore.bind(this);
     this._onUpdateDrawBoard = this._onUpdateDrawBoard.bind(this);
 
     socket.register((data) => {
@@ -67,9 +68,13 @@ class App extends Component {
               cells = {this.state.cells}
             />
             <div className="buttons">
-              <button>Explore</button>
-              <ShortestPathButton
+              <Button
+                onClick = {this._onClickExplore}
+                name = "Explore"
+              />
+              <Button
                 onClick = {this._onClickShortestPath}
+                name = "Shortest Path"
               />
             </div>
           </div>
@@ -88,7 +93,20 @@ class App extends Component {
       }
     }
     socket.send(msg);
-    socket.send("shortestpath")
+    socket.send("shortestpath");
+  };
+
+  _onClickExplore = () => {
+    console.log('Explore start');
+    let msg = "map";
+    for (let row = 1; row <= 20; row++) {
+      msg += "\n";
+      for (let col = 1; col <= 15; col++) {
+        msg += this.state.drawCells[[row, col]].toString();
+      }
+    }
+    socket.send(msg);
+    socket.send("explore");
   };
 
   _onUpdateDrawBoard = (cells) => {

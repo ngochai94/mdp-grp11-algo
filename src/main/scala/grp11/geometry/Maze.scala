@@ -27,7 +27,13 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
     }
   }
 
-  def getCoverage: Int = cells.values.filter(_ == Empty).toList.length
+  def getCoverage: Int = cells.values.filter(_ != Unknown).toList.length
+
+  def getArea: Int = height * width
+
+  def fullyExplored: Boolean = getCoverage == getArea
+
+  def getStop: Cell = Cell(width - 1, height - 1)
 
   def draw(path: List[RobotPosition] = Nil): String = {
     (1 to height).toList.reverse.map { row =>
@@ -69,6 +75,19 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
     val paddedStateBin = stateBin ++ List.fill(padding)(0)
     Utils.bins2Hexs(paddedStateBin)
   }
+
+  override def toString: String = {
+    (1 to height).toList.reverse.map { row =>
+      (1 to width).foldLeft("") { case (s, col) =>
+        val symbol = cells(Cell(col, row)) match {
+          case Unknown => "0"
+          case Empty => "1"
+          case Blocked => "2"
+        }
+        s ++ symbol
+      }
+    }.mkString("\n")
+  }
 }
 
 object Maze {
@@ -87,6 +106,24 @@ object Maze {
     }{
       cells(Cell(col, row)) = Unknown
     }
+    // Start pos is always empty
+    for {
+      row <- 1 to 3
+      col <- 1 to 3
+    } {
+      cells(Cell(col, row)) = Empty
+    }
     new Maze(cells, height, width)
+  }
+
+  def emptyMaze = {
+    val cells = mutable.HashMap[Cell, CellState]()
+    for {
+      row <- 1 to Height
+      col <- 1 to Width
+    } {
+      cells(Cell(col, row)) = Empty
+    }
+    new Maze(cells, Height, Width)
   }
 }

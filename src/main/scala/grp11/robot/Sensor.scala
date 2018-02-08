@@ -15,3 +15,13 @@ case class Sensor(relX: Int, relY: Int, relOrientation: Orientation, range: List
     case Right => (robotPosition.center + Cell(relY, -relX), relOrientation.turnRight)
   }
 }
+
+object Sensor {
+  val defaultSensors = List(
+    Sensor(-1, 1, Up, List(1, 2, 3)),
+    Sensor(0, 1, Up, List(1, 2, 3)),
+    Sensor(1, 1, Up, List(1, 2, 3)),
+    Sensor(-1, 0, Left, List(1, 2, 3)),
+    Sensor(1, 0, Right, List(1, 2, 3))
+  )
+}

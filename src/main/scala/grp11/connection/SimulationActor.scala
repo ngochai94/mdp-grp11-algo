@@ -8,18 +8,22 @@ import grp11.utils.Utils
 class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) extends Actor {
   override def receive: Receive = {
     case ExploreStart =>
+      // Only use final maze for virtual sensors
       val explorer = Explore(robot)
+      println("Starting exploration")
       while (!explorer.finished) {
-
+        val position = explorer.step
+        forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(position, robot.getPerceivedMaze))
       }
+      println("Finished exploration")
     case ShortestPath =>
       println("Starting shortest path...")
+      // Always use final maze in shortest path calculation
       val path = Dijkstra(robot.finalMaze,
         robot.getPosition,
         robot.finalMaze.getStop,
         1.0 * robot.turnTime / robot.moveTime
       )
-      println(path)
       val moves = Utils.path2Moves(path)
       moves.foreach { move =>
         robot.move(move)

@@ -18,7 +18,11 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
       val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))
       simulationActor ! ShortestPath
     case "explore" =>
-      // TODO: call simulation actor for exploring simulation
+      val robot = VirtualRobot(maze, Sensor.defaultSensors, 50, 50)
+      val snapshot = Random.nextInt
+      forwarder ! FwUpdate(snapshot)
+      val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))
+      simulationActor ! ExploreStart
     case s: String if s.startsWith("map") =>
       val map = s.split("\n").tail
       for {
