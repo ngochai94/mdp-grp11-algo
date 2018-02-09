@@ -4,7 +4,7 @@ import grp11.geometry.Maze
 
 trait Robot {
   def getPosition: RobotPosition
-  def setPosition(robotPosition: RobotPosition): Unit
+  def getSensors: List[Sensor]
   def sense(): Unit
   def move(move: Move): Unit
   def getPerceivedMaze: Maze

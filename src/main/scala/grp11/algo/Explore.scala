@@ -59,8 +59,19 @@ class Explore(robot: Robot) {
 //      println(distanceMap.filterKeys(x => !visited(x)).filter(x => x._2._1 < 7))
 //      println(robot.getPerceivedMaze.isHelpfulPosition(RobotPosition(Cell(13,3), Orientation.Down)))
       val target = distanceMap.filterKeys(position => !visited(position))
-        .filterKeys(position => robot.getPerceivedMaze.isHelpfulPosition(position))
+        .filterKeys(position => robot.getPerceivedMaze.isHelpfulPosition(position, robot.getSensors))
         .minBy(_._2._1)._1
+      val position = RobotPosition(Cell(14, 19), Orientation.Down)
+      val cellsUnder = for {
+        sensor <- robot.getSensors
+        (sensorCell, orientation) = sensor.getState(position)
+        cell = sensorCell + orientation * 1
+        if robot.getPerceivedMaze.isInside(cell)
+        _ = println(cell)
+        _ = println(sensorCell)
+        _ = println(orientation)
+      } yield robot.getPerceivedMaze.cells(cell)
+      println(cellsUnder)
       val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
       val moves = Utils.path2Moves(path)
       //      printVisited()

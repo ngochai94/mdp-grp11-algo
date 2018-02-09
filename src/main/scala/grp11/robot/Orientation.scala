@@ -5,7 +5,7 @@ import grp11.geometry.Cell
 case class Orientation(x: Int, y: Int) {
   def turnLeft = Orientation(-y, x)
   def turnRight = Orientation(y, -x)
-  def turnBack = Orientation(-y, -x)
+  def turnBack = Orientation(-x, -y)
   def *(num: Int): Cell = Cell(x * num, y * num)
 }
 

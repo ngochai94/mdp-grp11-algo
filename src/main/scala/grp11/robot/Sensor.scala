@@ -10,7 +10,7 @@ import grp11.robot.Orientation._
 case class Sensor(relX: Int, relY: Int, relOrientation: Orientation, range: List[Int]) {
   def getState(robotPosition: RobotPosition): (Cell, Orientation) = robotPosition.orientation match {
     case Up => (robotPosition.center + Cell(relX, relY), relOrientation)
-    case Down => (robotPosition.center + Cell(-relX, -relX), relOrientation.turnBack)
+    case Down => (robotPosition.center + Cell(-relX, -relY), relOrientation.turnBack)
     case Left => (robotPosition.center + Cell(-relY, relX), relOrientation.turnLeft)
     case Right => (robotPosition.center + Cell(relY, -relX), relOrientation.turnRight)
   }

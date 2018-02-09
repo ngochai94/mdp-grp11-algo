@@ -1,7 +1,7 @@
 package grp11.geometry
 
 import CellState._
-import grp11.robot.RobotPosition
+import grp11.robot.{RobotPosition, Sensor}
 import grp11.utils.Utils
 
 import scala.collection.mutable
@@ -28,21 +28,16 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
     !cellsUnder.contains(false)
   }
 
-  // TODO: make this more accurate
-  def isHelpfulPosition(position: RobotPosition): Boolean = {
+  def isHelpfulPosition(position: RobotPosition, sensors: List[Sensor]): Boolean = {
     if (!isValidPosition(position)) false
     else {
-      val center = position.center
       val cellsUnder = for {
-        x <- -2 to 2
-        y <- -2 to 2
-        cell = center + Cell(x, y)
+        sensor <- sensors
+        (sensorCell, orientation) = sensor.getState(position)
+        cell = sensorCell + orientation * 1
         if isInside(cell)
-      } yield {
-        if (cells(cell) == Unknown) false
-        else true
-      }
-      cellsUnder.contains(false)
+      } yield cells(cell)
+      cellsUnder.contains(Unknown)
     }
   }
 

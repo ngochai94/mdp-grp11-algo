@@ -10,17 +10,19 @@ class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTi
 
   override def getPosition: RobotPosition = position
 
+  override def getSensors: List[Sensor] = sensors
+
   override def sense(): Unit = {
     sensors.flatMap { sensor =>
       val (pos, orientation) = sensor.getState(position)
       sensor.range
         .map(distance => pos + orientation * distance)
-        .filter(perceivedMaze.containsCell(_))
+        .filter(perceivedMaze.containsCell)
         .foldLeft(List[Cell]()) { case (cells, cell) =>
           if (cells.exists(finalMaze.getState(_) == Blocked)) cells
           else cells :+ cell
         }
-    }.map(cell => perceivedMaze.setState(cell, finalMaze.getState(cell)))
+    }.foreach(cell => perceivedMaze.setState(cell, finalMaze.getState(cell)))
   }
 
   override def move(move: Move): Unit = {
@@ -35,10 +37,6 @@ class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTi
   }
 
   override def getPerceivedMaze: Maze = perceivedMaze
-
-  override def setPosition(newPosition: RobotPosition): Unit = {
-    position = newPosition
-  }
 
   override def getTurnCost: Double = 1.0 * turnTime / moveTime
 
