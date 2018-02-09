@@ -11,19 +11,38 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
   def getState(cell: Cell): CellState = cells(cell)
   def setState(cell: Cell, cellState: CellState): Unit = cells(cell) = cellState
 
+  def isInside(cell: Cell): Boolean = {
+    cell.x >= 1 && cell.x <= width && cell.y >= 1 && cell.y <= height
+  }
+
   def isValidPosition(position: RobotPosition): Boolean = {
     val center = position.center
-    if (!(center.x > 1 && center.x < width && center.y > 1 && center.y < height)) {
-      false
-    } else {
+    val cellsUnder = for {
+      x <- -1 to 1
+      y <- -1 to 1
+      cell = center + Cell(x, y)
+    } yield {
+      if (!isInside(cell) || cells(cell) != Empty) false
+      else true
+    }
+    !cellsUnder.contains(false)
+  }
+
+  // TODO: make this more accurate
+  def isHelpfulPosition(position: RobotPosition): Boolean = {
+    if (!isValidPosition(position)) false
+    else {
+      val center = position.center
       val cellsUnder = for {
-        x <- -1 to 1
-        y <- -1 to 1
+        x <- -2 to 2
+        y <- -2 to 2
+        cell = center + Cell(x, y)
+        if isInside(cell)
       } yield {
-        if (cells(Cell(x + center.x, y + center.y)) != Empty) false
+        if (cells(cell) == Unknown) false
         else true
       }
-      !cellsUnder.contains(false)
+      cellsUnder.contains(false)
     }
   }
 

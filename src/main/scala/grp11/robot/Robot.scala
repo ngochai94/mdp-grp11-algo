@@ -8,4 +8,5 @@ trait Robot {
   def sense(): Unit
   def move(move: Move): Unit
   def getPerceivedMaze: Maze
+  def getTurnCost: Double
 }

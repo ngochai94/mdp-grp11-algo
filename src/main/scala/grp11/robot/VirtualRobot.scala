@@ -4,7 +4,7 @@ import grp11.geometry.CellState.Blocked
 import grp11.geometry.{Cell, Maze}
 import grp11.robot.Orientation.Up
 
-case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTime: Int) extends Robot {
+class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTime: Int) extends Robot {
   val perceivedMaze = Maze()
   var position = RobotPosition(Cell(2, 2), Up)
 
@@ -25,6 +25,9 @@ case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, t
 
   override def move(move: Move): Unit = {
     position = position.applyMove(move)
+    if (!finalMaze.isValidPosition(position)) {
+      throw new Exception("move to a invalid position")
+    }
     move match {
       case Move.Forward => Thread.sleep(moveTime)
       case _ => Thread.sleep(turnTime)
@@ -36,4 +39,8 @@ case class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, t
   override def setPosition(newPosition: RobotPosition): Unit = {
     position = newPosition
   }
+
+  override def getTurnCost: Double = 1.0 * turnTime / moveTime
+
+  def getFinalMaze: Maze = finalMaze
 }

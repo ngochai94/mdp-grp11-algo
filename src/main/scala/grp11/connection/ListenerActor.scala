@@ -12,13 +12,13 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
 
   override def receive: Receive = {
     case "shortestpath" =>
-      val robot = VirtualRobot(maze, Sensor.defaultSensors, 300, 300)
+      val robot = new VirtualRobot(maze, Sensor.defaultSensors, 100, 100)
       val snapshot = Random.nextInt
       forwarder ! FwUpdate(snapshot)
       val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))
       simulationActor ! ShortestPath
     case "explore" =>
-      val robot = VirtualRobot(maze, Sensor.defaultSensors, 50, 50)
+      val robot = new VirtualRobot(maze, Sensor.defaultSensors, 49, 50)
       val snapshot = Random.nextInt
       forwarder ! FwUpdate(snapshot)
       val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))

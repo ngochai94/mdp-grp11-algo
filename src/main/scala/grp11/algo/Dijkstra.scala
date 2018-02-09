@@ -11,6 +11,16 @@ object Dijkstra {
   def apply(maze: Maze, start: RobotPosition, end: Cell, turnCost: Double): List[RobotPosition] = {
     val distanceMap = getDistanceMap(maze, start, turnCost)
     var position = distanceMap.filterKeys(_.center == end).minBy(_._2._1)._1
+    getPathWithDistanceMap(distanceMap, start, position)
+  }
+
+  def getPathWithDistanceMap(
+                              distanceMap: mutable.HashMap[RobotPosition,(Double, RobotPosition)],
+                              start: RobotPosition,
+                              target: RobotPosition
+                            ): List[RobotPosition] = {
+
+    var position = target
     if (distanceMap(position)._1 == Double.MaxValue) {
       Nil
     } else {

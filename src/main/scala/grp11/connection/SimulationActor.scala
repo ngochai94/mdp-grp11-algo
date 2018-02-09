@@ -9,7 +9,7 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
   override def receive: Receive = {
     case ExploreStart =>
       // Only use final maze for virtual sensors
-      val explorer = Explore(robot)
+      val explorer = new Explore(robot)
       println("Starting exploration")
       while (!explorer.finished) {
         val position = explorer.step
@@ -19,15 +19,15 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
     case ShortestPath =>
       println("Starting shortest path...")
       // Always use final maze in shortest path calculation
-      val path = Dijkstra(robot.finalMaze,
+      val path = Dijkstra(robot.getFinalMaze,
         robot.getPosition,
-        robot.finalMaze.getStop,
-        1.0 * robot.turnTime / robot.moveTime
+        robot.getFinalMaze.getStop,
+        robot.getTurnCost
       )
       val moves = Utils.path2Moves(path)
       moves.foreach { move =>
         robot.move(move)
-        forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(robot.getPosition, robot.finalMaze))
+        forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(robot.getPosition, robot.getFinalMaze))
       }
   }
 }
