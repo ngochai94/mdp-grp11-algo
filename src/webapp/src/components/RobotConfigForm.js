@@ -14,13 +14,13 @@ export default class RobotConfigForm extends Component {
       <div className="setting-group">
         <Input
           className="setting"
-          defaultValue="300"
+          defaultValue="100"
           onBlur={(e) => socket.updateMoveTime(e.target.value)}
           addonBefore="Move time"
           addonAfter="ms"/>
         <Input
           className="setting"
-          defaultValue="300"
+          defaultValue="120"
           onBlur={(e) => socket.updateTurnTime(e.target.value)}
           addonBefore="Turn time"
           addonAfter="ms"/>

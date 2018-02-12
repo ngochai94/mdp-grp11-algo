@@ -9,8 +9,8 @@ import scala.util.Random
 
 class ListenerActor(forwarder: ActorRef) extends Actor {
   var maze: Maze = Maze()
-  var moveTime: Int = 300
-  var turnTime: Int = 300
+  var moveTime: Int = 100
+  var turnTime: Int = 120
 
   override def receive: Receive = {
     case "shortestpath" =>

@@ -1,6 +1,7 @@
 import Socket from 'simple-websocket';
 
-const socket = Socket("ws://localhost:8080/");
+const WS_URL = 'ws://localhost:8080';
+const socket = Socket(WS_URL);
 let connected = false;
 
 socket.on('connect', () => {
@@ -14,17 +15,10 @@ socket.on('close', () => {
   connected = false;
 });
 
-function wait(cb) {
-  if (!connected) {
-    console.log('connecting...');
-    setTimeout(wait, 1000);
-  } else {
-    cb();
-  }
-}
-
 function send(msg) {
-  wait(() => socket.send(msg));
+  if (connected) {
+    socket.send(msg);
+  }
 }
 
 function sendHeartBeat() {
@@ -58,7 +52,6 @@ export default {
   updateMap,
   startExplore,
   startShortestPath,
-
   register: (cb) => {
     socket.on('data', (data) => {
       const s = new TextDecoder("utf-8").decode(data);
