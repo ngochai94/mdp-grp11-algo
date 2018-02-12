@@ -94,25 +94,27 @@ class App extends Component {
   _onClickShortestPath = () => {
     console.log('Shortest path start');
     this._onSendMap();
-    socket.send("shortestpath");
+    socket.startShortestPath();
   };
 
   _onClickExplore = () => {
     console.log('Explore start');
     this._onSendMap();
-    socket.send("explore");
+    socket.startExplore();
   };
 
   _onSendMap = () => {
-    let msg = "map";
+    let map = ""
     for (let row = 1; row <= 20; row++) {
-      msg += "\n";
+      if (map) {
+        map += "\n";
+      }
       for (let col = 1; col <= 15; col++) {
-        msg += this.state.drawCells[[row, col]].toString();
+        map += this.state.drawCells[[row, col]].toString();
       }
     }
-    socket.send(msg);
-  }
+    socket.updateMap(map);
+  };
 
   _onUpdateDrawBoard = (cells) => {
     this.setState({
