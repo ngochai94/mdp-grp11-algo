@@ -1,20 +1,19 @@
 .cell {
-    /*background-color: aqua;*/
-    width: calc(6.66666666667% - 2px);
-    height: calc(5% - 2px);
-    /*padding-bottom: 12.5%;*/
-    float: left;
-    position: relative;
-    border: solid 1px black;
-    border-radius: 3px;
+  width: calc(6.66666666667%);
+  height: calc(5%);
+  float: left;
+  position: relative;
+  border: solid 1px black;
+  border-radius: 3px;
+  box-sizing: inherit;
 }
 
 .cell.blocked {
-    background-color: #F7CA18;
-    /*background-color: #ABB7B7;*/
+  background-color: #F7CA18;
+  /*background-color: #ABB7B7;*/
 }
 
 .cell.empty {
-    background-color: #22A7F0;
-    /*background-color: #F7CA18;*/
+  background-color: #00b894;
+  /*background-color: #F7CA18;*/
 }

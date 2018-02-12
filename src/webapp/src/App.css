@@ -1,32 +1,32 @@
-.App {
-  text-align: center;
-}
+/*.App {*/
+  /*text-align: center;*/
+/*}*/
 
-.App-header {
-  background-color: #222;
-  height: 30px;
-  padding: 10px;
-  color: white;
-}
+/*.App-header {*/
+  /*background-color: #222;*/
+  /*height: 30px;*/
+  /*padding: 10px;*/
+  /*color: white;*/
+/*}*/
 
-.App-title {
-  font-size: 1.5em;
-}
+/*.App-title {*/
+  /*font-size: 1.5em;*/
+/*}*/
 
-.App-intro {
-  font-size: large;
-}
+/*.App-intro {*/
+  /*font-size: large;*/
+/*}*/
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/*@keyframes App-logo-spin {*/
+  /*from { transform: rotate(0deg); }*/
+  /*to { transform: rotate(360deg); }*/
+/*}*/
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-}
+/*body {*/
+  /*margin: 0;*/
+  /*padding: 0;*/
+  /*font-family: sans-serif;*/
+/*}*/
 
 .left-half {
   position: absolute;
@@ -43,9 +43,23 @@ body {
 .buttons {
   margin-top: 50px;
   margin-left: 150px;
-  float: left;
+  float: left
 }
 
-button {
-  margin: 20px;
+.button {
+  margin-right: 20px;
+}
+
+.setting, .setting-group .ant-input-group-wrapper {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.setting-group {
+  margin-top: 7vw;
+}
+
+.header-text {
+  color: white;
+  font-size: 20px;
 }

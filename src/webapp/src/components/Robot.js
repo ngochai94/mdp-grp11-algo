@@ -3,16 +3,16 @@ import RobotImg from '../robot.gif';
 
 export default class Robot extends Component {
   render() {
-    const height = 65;
-    const width = 65;
-    const left = 100 + (this.props.x - 0.5) * 24 - height / 2;
-    const top = 50 + (20.5 - this.props.y) * 24 - width / 2;
+    const height = 5;
+    const width = 5;
+    const left = (this.props.x - 2) * 1.66666;
+    const top = (21 - this.props.y) * 1.66666;
     const styles = {
-      height: height + 'px',
-      width: width + 'px',
+      height: height + 'vw',
+      width: width + 'vw',
       position: 'absolute',
-      left,
-      top,
+      left: left + 'vw',
+      top: top + 'vw',
       transform: 'rotate(' + this.props.rotate + 'deg)',
     };
     return (

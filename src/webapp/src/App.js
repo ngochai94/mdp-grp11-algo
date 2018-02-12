@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
 import Board from './components/Board'
-import './App.css';
-import Button from "./components/Button";
+import RobotConfigForm from "./components/RobotConfigForm";
+import { Layout, Col } from 'antd';
 import socket from './api/Api';
+
+import './App.css';
+import 'antd/dist/antd.css';
+
+const { Header } = Layout;
 
 class App extends Component {
   constructor(props) {
@@ -17,6 +22,7 @@ class App extends Component {
     this._onClickShortestPath = this._onClickShortestPath.bind(this);
     this._onClickExplore = this._onClickExplore.bind(this);
     this._onUpdateDrawBoard = this._onUpdateDrawBoard.bind(this);
+    this._onSendMap = this._onSendMap.bind(this);
 
     socket.register((data) => {
       const { maze, robot } = JSON.parse(data);
@@ -47,57 +53,57 @@ class App extends Component {
   };
 
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <div className="App-title">Board Visualization</div>
-        </header>
-        <div>
-          <div className="left-half">
-            <Board
-              cells = {this.state.drawCells}
-              onUpdate = {this._onUpdateDrawBoard}
-            />
-          </div>
-          <div className="right-half">
-            <Board
-              robotX = {this.state.robot.x}
-              robotY = {this.state.robot.y}
-              rotate = {this.state.rotate}
-              enforced = {true}
-              cells = {this.state.cells}
-            />
-            <div className="buttons">
-              <Button
-                onClick = {this._onClickExplore}
-                name = "Explore"
-              />
-              <Button
-                onClick = {this._onClickShortestPath}
-                name = "Shortest Path"
-              />
-            </div>
-          </div>
-        </div>
+    const boards = (
+      <div>
+        <Col span={2}/>
+        <Col span={6}>
+          <Board
+            cells = {this.state.drawCells}
+            onUpdate = {this._onUpdateDrawBoard}
+          />
+        </Col>
+        <Col span={1}/>
+        <Col span={6} className="setting-group">
+          <RobotConfigForm
+            onSendMap = {this._onSendMap}
+          />
+        </Col>
+        <Col span={1}/>
+        <Col span={6}>
+          <Board
+            robotX = {this.state.robot.x}
+            robotY = {this.state.robot.y}
+            rotate = {this.state.rotate}
+            enforced = {true}
+            cells = {this.state.cells}
+          />
+        </Col>
+        <Col span={2}/>
       </div>
+    );
+    return (
+      <Layout>
+        <Header>
+          <div className="header-text">Board Visualization</div>
+        </Header>
+        {boards}
+      </Layout>
     );
   }
 
   _onClickShortestPath = () => {
     console.log('Shortest path start');
-    let msg = "map";
-    for (let row = 1; row <= 20; row++) {
-      msg += "\n";
-      for (let col = 1; col <= 15; col++) {
-        msg += this.state.drawCells[[row, col]].toString();
-      }
-    }
-    socket.send(msg);
+    this._onSendMap();
     socket.send("shortestpath");
   };
 
   _onClickExplore = () => {
     console.log('Explore start');
+    this._onSendMap();
+    socket.send("explore");
+  };
+
+  _onSendMap = () => {
     let msg = "map";
     for (let row = 1; row <= 20; row++) {
       msg += "\n";
@@ -106,8 +112,7 @@ class App extends Component {
       }
     }
     socket.send(msg);
-    socket.send("explore");
-  };
+  }
 
   _onUpdateDrawBoard = (cells) => {
     this.setState({
