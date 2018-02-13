@@ -6,6 +6,7 @@ import socket from './api/Api';
 
 import './App.css';
 import 'antd/dist/antd.css';
+import MapUploader from "./components/MapUploader";
 
 const { Header } = Layout;
 
@@ -23,6 +24,7 @@ class App extends Component {
     this._onClickExplore = this._onClickExplore.bind(this);
     this._onUpdateDrawBoard = this._onUpdateDrawBoard.bind(this);
     this._onSendMap = this._onSendMap.bind(this);
+    this._onLoadMap = this._onLoadMap.bind(this);
 
     socket.register((data) => {
       const { maze, robot } = JSON.parse(data);
@@ -43,7 +45,12 @@ class App extends Component {
   }
 
   getCellsFromTextMap = (map) => {
-    let cells = {};
+    // TODO: Separate this validation and update UI accordingly
+    if (map && (map.length < 20 || map[0].length < 15)) {
+      console.log('Invalid map format!');
+      map = null;
+    }
+    const cells = {};
     for (let row = 1; row <= 20; row++) {
       for (let col = 1; col <= 15; col++) {
         cells[[row, col]] = map ? parseInt(map[20 - row][col - 1], 10) : 1;
@@ -54,13 +61,14 @@ class App extends Component {
 
   render() {
     const boards = (
-      <div>
+      <div className="app">
         <Col span={2}/>
         <Col span={6}>
           <Board
             cells = {this.state.drawCells}
             onUpdate = {this._onUpdateDrawBoard}
           />
+          <MapUploader onLoad={this._onLoadMap}/>
         </Col>
         <Col span={1}/>
         <Col span={6} className="setting-group">
@@ -119,8 +127,15 @@ class App extends Component {
   _onUpdateDrawBoard = (cells) => {
     this.setState({
       drawCells: cells,
-    })
-  }
+    });
+  };
+
+  _onLoadMap = (map) => {
+    console.log(map);
+    this.setState({
+      drawCells: this.getCellsFromTextMap(map.split('\n')),
+    });
+  };
 }
 
 export default App;

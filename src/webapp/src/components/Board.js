@@ -25,14 +25,19 @@ export default class Board extends Component {
     this._onCellRelease = this._onCellRelease.bind(this);
   }
 
-  render() {
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      tmpCells: nextProps.cells,
+    });
+  }
 
+  render() {
     const robot = this.props.robotX ? (
       <Robot
         x = {this.props.robotX}
         y = {this.props.robotY}
         rotate = {this.props.rotate}
-    />) : null;
+      />) : null;
 
     return (
       <div
