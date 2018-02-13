@@ -14,25 +14,6 @@
   width: 60%;
 }
 
-.buttons {
-  margin-top: 50px;
-  margin-left: 150px;
-  float: left
-}
-
-.button {
-  margin-right: 20px;
-}
-
-.setting, .setting-group .ant-input-group-wrapper {
-  width: 100%;
-  margin-bottom: 30px;
-}
-
-.setting-group {
-  margin-top: 7vw;
-}
-
 .header-text {
   color: white;
   font-size: 20px;

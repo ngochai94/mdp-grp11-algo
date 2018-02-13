@@ -34,6 +34,14 @@ function updateTurnTime(turnTime) {
   send("turntime\n" + turnTime);
 }
 
+function updateCoverageLimit(coverageLimit) {
+  send("coverage\n" + coverageLimit)
+}
+
+function updateTimeLimit(timeLimit) {
+  send("time\n" + timeLimit)
+}
+
 function updateMap(map) {
   send("map\n" + map);
 }
@@ -49,6 +57,8 @@ function startShortestPath() {
 export default {
   updateMoveTime,
   updateTurnTime,
+  updateCoverageLimit,
+  updateTimeLimit,
   updateMap,
   startExplore,
   startShortestPath,

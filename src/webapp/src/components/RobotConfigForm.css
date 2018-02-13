@@ -1,0 +1,9 @@
+.setting, .setting-group .ant-input-group-wrapper {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.setting-group {
+  margin-top: 5vw;
+}
+

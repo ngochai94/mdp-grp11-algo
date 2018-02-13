@@ -13,7 +13,7 @@ export default class MapUploader extends Component {
         <Upload
           beforeUpload={this.handleFile}
         >
-          <Button>
+          <Button type="dashed">
             <Icon type="upload"/>Upload map
           </Button>
         </Upload>

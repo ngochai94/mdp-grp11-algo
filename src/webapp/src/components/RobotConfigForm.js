@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Input, Button } from 'antd';
 import socket from '../api/Api';
 
+import './RobotConfigForm.css';
+
 export default class RobotConfigForm extends Component {
   constructor(props) {
     super(props);
@@ -24,6 +26,18 @@ export default class RobotConfigForm extends Component {
           onBlur={(e) => socket.updateTurnTime(e.target.value)}
           addonBefore="Turn time"
           addonAfter="ms"/>
+        <Input
+          className="setting"
+          defaultValue="100"
+          onBlur={(e) => socket.updateCoverageLimit(e.target.value)}
+          addonBefore="Coverage limit"
+          addonAfter="%"/>
+        <Input
+          className="setting"
+          defaultValue="360"
+          onBlur={(e) => socket.updateTimeLimit(e.target.value)}
+          addonBefore="Time limit"
+          addonAfter="s"/>
         <Button className="setting" onClick={this._onClickExplore} type="primary">Explore</Button>
         <Button className="setting" onClick={this._onClickShortestPath} type="primary">Shortest Path</Button>
       </div>
