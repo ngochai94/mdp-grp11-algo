@@ -12,20 +12,23 @@ import scala.io.StdIn
 
 object Main extends App {
   new WebSocketServer
-//  val maze = Maze.emptyMaze
-//  val robot = new VirtualRobot(maze, Sensor.defaultSensors, 49, 50)
-//  val explorer = new Explore(robot)
-//  println("Starting exploration")
-//  while (!explorer.finished) {
-//    val position = explorer.step
-//    println("robot now at " + position)
-//  }
-//  println("Finished exploration")
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 object Tmp {
+  def testExploration(): Unit = {
+      val maze = Maze.emptyMaze
+      val robot = new VirtualRobot(maze, Sensor.defaultSensors, 49, 50)
+      val explorer = new Explore(robot)
+      println("Starting exploration")
+      while (!explorer.finished) {
+        val position = explorer.step
+        println("robot now at " + position)
+      }
+      println("Finished exploration")
+  }
+
   def testWS(): Unit = {
     val server = new WebSocketServer
     while (true) {
