@@ -41,11 +41,11 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
     }
   }
 
-  def getCoverage: Int = cells.values.filter(_ != Unknown).toList.length
+  def cellsExplored: Int = cells.values.filter(_ != Unknown).toList.length
 
   def getArea: Int = height * width
 
-  def fullyExplored: Boolean = getCoverage == getArea
+  def getCoverage: Double = cellsExplored * 100.0 / getArea
 
   def getStop: Cell = Cell(width - 1, height - 1)
 

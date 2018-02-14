@@ -7,11 +7,12 @@ import grp11.utils.Utils
 import scala.collection.mutable
 import scala.util.Random
 
-class Explore(robot: Robot) {
+class Explore(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000) {
   private[this] val r: Random.type = Random
   private[this] val visited = mutable.HashMap[RobotPosition, Boolean]()
   private[this] val height = robot.getPerceivedMaze.height
   private[this] val width = robot.getPerceivedMaze.width
+  private[this] val start = System.currentTimeMillis()
 
   for {
     row <- 1 to height
@@ -26,7 +27,7 @@ class Explore(robot: Robot) {
 
   def step: RobotPosition = {
     robot.sense()
-    if (!robot.getPerceivedMaze.fullyExplored) {
+    if (!shouldFinish) {
       println("-----------------------------------------------")
       println(robot.getPerceivedMaze.draw())
       visited(robot.getPosition) = true
@@ -63,5 +64,8 @@ class Explore(robot: Robot) {
     robot.getPosition
   }
 
-  def finished: Boolean = robot.getPerceivedMaze.fullyExplored && robot.getPosition.center == Cell(2, 2)
+  private[this] def shouldFinish: Boolean = robot.getPerceivedMaze.getCoverage >= coverageLimit ||
+    System.currentTimeMillis() - start >= timeLimit
+
+  def finished: Boolean = shouldFinish && robot.getPosition.center == Cell(2, 2)
 }

@@ -7,15 +7,17 @@ import grp11.utils.Utils
 
 class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) extends Actor {
   override def receive: Receive = {
-    case ExploreStart =>
+    case ExploreStart(coverageLimit, timeLimit) =>
       // Only use final maze for virtual sensors
-      val explorer = new Explore(robot)
+      val start = System.currentTimeMillis()
+      val explorer = new Explore(robot, coverageLimit, timeLimit)
       println("Starting exploration")
       while (!explorer.finished) {
         val position = explorer.step
         forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(position, robot.getPerceivedMaze))
       }
-      println("Finished exploration")
+      println(s"Finished exploration with ${robot.getPerceivedMaze.getCoverage}%" +
+        s" in ${(System.currentTimeMillis() - start) / 1000.0}s")
       println("Encoded map:\n" + robot.getPerceivedMaze.encodeExplored + "\n" + robot.getPerceivedMaze.encodeState)
     case ShortestPath =>
       println("Starting shortest path...")
@@ -34,5 +36,5 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
 }
 
 sealed trait SimulationActorMessage
-case object ExploreStart extends SimulationActorMessage
+case class ExploreStart(coverageLimit: Double, timeLimit: Long) extends SimulationActorMessage
 case object ShortestPath extends SimulationActorMessage

@@ -11,6 +11,8 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
   var maze: Maze = Maze()
   var moveTime: Int = 100
   var turnTime: Int = 120
+  var coverageLimit: Double = 100.0
+  var timeLimit: Long = 360000
 
   override def receive: Receive = {
     case "shortestpath" =>
@@ -25,7 +27,7 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
       val snapshot = Random.nextInt
       forwarder ! FwUpdate(snapshot)
       val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))
-      simulationActor ! ExploreStart
+      simulationActor ! ExploreStart(coverageLimit, timeLimit)
 
     case s: String if s.startsWith("movetime") =>
       moveTime = s.split("\n").tail.head.toInt
@@ -34,6 +36,14 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
     case s: String if s.startsWith("turntime") =>
       turnTime = s.split("\n").tail.head.toInt
       println(s"Turn time is changed to $turnTime")
+
+    case s: String if s.startsWith("coverage") =>
+      coverageLimit = s.split("\n").tail.head.toDouble
+      println(s"Coverage limit is changed to $coverageLimit")
+
+    case s: String if s.startsWith("time") =>
+      timeLimit = s.split("\n").tail.head.toLong * 1000
+      println(s"Time limit is changed to $timeLimit")
 
     case s: String if s.startsWith("map") =>
       val map = s.split("\n").tail
