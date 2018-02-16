@@ -3,7 +3,11 @@
   margin-bottom: 30px;
 }
 
-.setting-group {
+.setting-group .explore {
+  margin-top: 5vw;
+}
+
+.setting-group .shortestpath {
   margin-top: 5vw;
 }
 
