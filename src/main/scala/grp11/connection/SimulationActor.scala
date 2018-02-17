@@ -32,7 +32,10 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
       val moves = Utils.path2Moves(path)
       moves.foreach { move =>
         robot.move(move)
-        forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(robot.getPosition, robot.getFinalMaze))
+        forwarder ! FwMessage(
+          snapshot,
+          ClientBoardRepr.toJson(robot.getPosition, robot.getFinalMaze, path.map(_.center), wayPoint.toList)
+        )
       }
   }
 }

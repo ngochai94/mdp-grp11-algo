@@ -27,9 +27,16 @@ class App extends Component {
     this._onLoadMap = this._onLoadMap.bind(this);
 
     socket.register((data) => {
-      const { maze, robot } = JSON.parse(data);
+      const { maze, robot, path, wayPoint } = JSON.parse(data);
       const { x: ox, y: oy } = robot.orientation;
       const cells = this.getCellsFromTextMap(maze.split('\n'));
+
+      for (let i in path) {
+        cells[[path[i].y, path[i].x]] = 3;
+      }
+      for (let i in wayPoint) {
+        cells[[wayPoint[i].y, wayPoint[i].x]] = 4;
+      }
 
       let rotate = 0;
       if (ox === 1 && oy === 0) rotate = 90;

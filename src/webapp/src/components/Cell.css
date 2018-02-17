@@ -10,10 +10,16 @@
 
 .cell.blocked {
   background-color: #F7CA18;
-  /*background-color: #ABB7B7;*/
 }
 
 .cell.empty {
   background-color: #00b894;
-  /*background-color: #F7CA18;*/
+}
+
+.cell.path {
+  background-color: #0984e3;
+}
+
+.cell.waypoint {
+  background-color: #d63031;
 }

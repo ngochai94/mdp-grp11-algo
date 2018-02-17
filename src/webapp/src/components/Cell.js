@@ -26,6 +26,10 @@ export default class Cell extends Component {
       status = 'unknown';
     } else if (this.props.status === 2) {
       status = 'blocked';
+    } else if (this.props.status === 3) {
+      status = 'path';
+    } else if (this.props.status === 4) {
+      status = 'waypoint';
     }
     return status;
   }
