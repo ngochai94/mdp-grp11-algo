@@ -13,6 +13,8 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
   var turnTime: Int = 120
   var coverageLimit: Double = 100.0
   var timeLimit: Long = 360000
+  var wayPointX: Option[Int] = None
+  var wayPointY: Option[Int] = None
 
   override def receive: Receive = {
     case "shortestpath" =>
@@ -20,7 +22,11 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
       val snapshot = Random.nextInt
       forwarder ! FwUpdate(snapshot)
       val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))
-      simulationActor ! ShortestPath
+      val wayPoint = for {
+        x <- wayPointX
+        y <- wayPointY
+      } yield Cell(x, y)
+      simulationActor ! ShortestPath(wayPoint)
 
     case "explore" =>
       val robot = new VirtualRobot(maze, Sensor.defaultSensors, moveTime, turnTime)
@@ -44,6 +50,16 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
     case s: String if s.startsWith("time") =>
       timeLimit = s.split("\n").tail.head.toLong * 1000
       println(s"Time limit is changed to $timeLimit")
+
+    case s: String if s.startsWith("waypointx") =>
+      val arg = s.split("\n").tail.headOption
+      wayPointX = arg.map(_.toInt)
+      println(s"Way Point X is changed to $wayPointX")
+
+    case s: String if s.startsWith("waypointy") =>
+      val arg = s.split("\n").tail.headOption
+      wayPointY = arg.map(_.toInt)
+      println(s"Way Point Y is changed to $wayPointY")
 
     case s: String if s.startsWith("map") =>
       val map = s.split("\n").tail

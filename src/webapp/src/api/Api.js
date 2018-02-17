@@ -54,6 +54,14 @@ function startShortestPath() {
   send("shortestpath");
 }
 
+function updateWayPointX(wayPointX) {
+  send("waypointx\n" + wayPointX);
+}
+
+function updateWayPointY(wayPointY) {
+  send("waypointy\n" + wayPointY);
+}
+
 export default {
   updateMoveTime,
   updateTurnTime,
@@ -62,6 +70,8 @@ export default {
   updateMap,
   startExplore,
   startShortestPath,
+  updateWayPointX,
+  updateWayPointY,
   register: (cb) => {
     socket.on('data', (data) => {
       const s = new TextDecoder("utf-8").decode(data);

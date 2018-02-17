@@ -8,10 +8,16 @@ import scala.collection.mutable
 
 object Dijkstra {
   val Eps = 1e-6
-  def apply(maze: Maze, start: RobotPosition, end: Cell, turnCost: Double): List[RobotPosition] = {
-    val distanceMap = getDistanceMap(maze, start, turnCost)
-    val position = distanceMap.filterKeys(_.center == end).minBy(_._2._1)._1
-    getPathWithDistanceMap(distanceMap, start, position)
+  def apply(maze: Maze, start: RobotPosition, end: Cell, turnCost: Double, wayPoint: Option[Cell] = None): List[RobotPosition] = {
+    wayPoint.fold {
+      val distanceMap = getDistanceMap(maze, start, turnCost)
+      val position = distanceMap.filterKeys(_.center == end).minBy(_._2._1)._1
+      getPathWithDistanceMap(distanceMap, start, position)
+    } { point =>
+      val distanceMap = getDistanceMap(maze, start, turnCost)
+      val position = distanceMap.filterKeys(_.center == point).minBy(_._2._1)._1
+      getPathWithDistanceMap(distanceMap, start, position) ++ apply(maze, position, end, turnCost, None).tail
+    }
   }
 
   def getPathWithDistanceMap(

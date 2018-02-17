@@ -53,7 +53,7 @@ export default class RobotConfigForm extends Component {
             <Input
               className="setting"
               defaultValue=""
-              onBlur={(e) => socket.updateMoveTime(e.target.value)}
+              onBlur={(e) => socket.updateWayPointX(e.target.value)}
               addonBefore="Waypoint X"/>
           </Col>
           <Col span={4}/>
@@ -61,7 +61,7 @@ export default class RobotConfigForm extends Component {
             <Input
               className="setting"
               defaultValue=""
-              onBlur={(e) => socket.updateTurnTime(e.target.value)}
+              onBlur={(e) => socket.updateWayPointY(e.target.value)}
               addonBefore="Waypoint Y"/>
           </Col>
           <Button className="setting" onClick={this._onClickShortestPath} type="primary">Shortest Path</Button>
