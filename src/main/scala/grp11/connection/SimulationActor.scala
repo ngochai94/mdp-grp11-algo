@@ -1,7 +1,7 @@
 package grp11.connection
 
 import akka.actor.{Actor, ActorRef}
-import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
+import grp11.algo.{Dijkstra, WallHugging}
 import grp11.geometry.Cell
 import grp11.robot.VirtualRobot
 import grp11.utils.Utils
@@ -12,7 +12,7 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
       // Only use final maze for virtual sensors
       val start = System.currentTimeMillis()
       val explorer = new WallHugging(robot, coverageLimit, timeLimit)
-      println(s"Starting exploration with coverageLimit = $coverageLimit% and timeLimit = ${timeLimit}s")
+      println(s"Starting exploration with coverageLimit = $coverageLimit% and timeLimit = ${timeLimit / 1000.0}s")
       while (!explorer.finished) {
         for {
           move <- explorer.step

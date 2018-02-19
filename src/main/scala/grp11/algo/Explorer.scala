@@ -7,16 +7,10 @@ import grp11.utils.Utils
 
 import scala.collection.mutable
 
-sealed trait Explorer {
-  def step: List[Move]
-  def finished: Boolean
-}
-
-class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000) extends Explorer {
-  private[this] val visited = mutable.HashMap[RobotPosition, Boolean]()
+sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: Long) {
+  private[algo] val visited = mutable.HashMap[RobotPosition, Boolean]()
   private[this] val height = robot.getPerceivedMaze.height
   private[this] val width = robot.getPerceivedMaze.width
-  private[this] val start = System.currentTimeMillis()
 
   for {
     row <- 1 to height
@@ -25,6 +19,17 @@ class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit:
   } {
     visited(RobotPosition(Cell(col, row), orientation)) = false
   }
+
+  private[this] val start = System.currentTimeMillis()
+  private[algo] def shouldFinish: Boolean = robot.getPerceivedMaze.getCoverage >= coverageLimit ||
+    System.currentTimeMillis() - start >= timeLimit
+  def finished: Boolean = shouldFinish && robot.getPosition.center == Cell(2, 2)
+
+  def step: List[Move]
+}
+
+class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
+  extends Explorer(robot, coverageLimit, timeLimit) {
 
   def step: List[Move] = {
     robot.sense()
@@ -44,28 +49,12 @@ class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit:
       List(moves.head)
     }
   }
-
-  private[this] def shouldFinish: Boolean = robot.getPerceivedMaze.getCoverage >= coverageLimit ||
-    System.currentTimeMillis() - start >= timeLimit
-
-  def finished: Boolean = shouldFinish && robot.getPosition.center == Cell(2, 2)
 }
 
-class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000) extends Explorer {
-  private[this] val visited = mutable.HashMap[RobotPosition, Boolean]()
-  private[this] val height = robot.getPerceivedMaze.height
-  private[this] val width = robot.getPerceivedMaze.width
-  private[this] val start = System.currentTimeMillis()
-  private[this] var looped = false
-//  private[this] val initialPosition = robot.getPosition
+class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
+  extends Explorer(robot, coverageLimit, timeLimit) {
 
-  for {
-    row <- 1 to height
-    col <- 1 to width
-    orientation <- Orientation.all
-  } {
-    visited(RobotPosition(Cell(col, row), orientation)) = false
-  }
+  private[this] var looped = false
 
   def step: List[Move] = {
     robot.sense()
@@ -100,9 +89,4 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
       List(moves.head)
     }
   }
-
-  private[this] def shouldFinish: Boolean = robot.getPerceivedMaze.getCoverage >= coverageLimit ||
-    System.currentTimeMillis() - start >= timeLimit
-
-  def finished: Boolean = shouldFinish && robot.getPosition.center == Cell(2, 2)
 }
