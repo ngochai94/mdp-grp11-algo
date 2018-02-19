@@ -22,6 +22,7 @@ object Sensor {
     Sensor(0, 1, Up, List(1, 2, 3)),
     Sensor(1, 1, Up, List(1, 2, 3)),
     Sensor(-1, 0, Left, List(1, 2, 3)),
-    Sensor(1, 0, Right, List(1, 2, 3))
+    Sensor(-1, 1, Left, List(1, 2, 3, 4, 5)),
+    Sensor(1, 1, Right, List(1, 2, 3))
   )
 }

@@ -1,6 +1,6 @@
 package grp11
 
-import grp11.algo.{Dijkstra, Explore}
+import grp11.algo.{Dijkstra, NearestHelpfulCell}
 import grp11.geometry.CellState._
 import grp11.geometry.{Cell, Maze}
 import grp11.connection.{FwMessage, RpiConnection, WebSocketServer}
@@ -20,7 +20,7 @@ object Tmp {
   def testExploration(): Unit = {
       val maze = Maze.emptyMaze
       val robot = new VirtualRobot(maze, Sensor.defaultSensors, 49, 50)
-      val explorer = new Explore(robot)
+      val explorer = new NearestHelpfulCell(robot)
       println("Starting exploration")
       while (!explorer.finished) {
         val position = explorer.step
