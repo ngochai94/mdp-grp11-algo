@@ -3,6 +3,7 @@ import Board from './components/Board'
 import RobotConfigForm from "./components/RobotConfigForm";
 import { Layout, Col } from 'antd';
 import socket from './api/Api';
+import './components/Notification';
 
 import './App.css';
 import 'antd/dist/antd.css';
@@ -27,27 +28,31 @@ class App extends Component {
     this._onLoadMap = this._onLoadMap.bind(this);
 
     socket.register((data) => {
-      const { maze, robot, path, wayPoint } = JSON.parse(data);
-      const { x: ox, y: oy } = robot.orientation;
-      const cells = this.getCellsFromTextMap(maze.split('\n'));
+      const parsedData = JSON.parse(data);
+      // console.log(parsedData);
+      if (parsedData['mType'] === 'board') {
+        const { maze, robot, path, wayPoint } = parsedData;
+        const {x: ox, y: oy} = robot.orientation;
+        const cells = this.getCellsFromTextMap(maze.split('\n'));
 
-      for (let i in path) {
-        cells[[path[i].y, path[i].x]] = 3;
+        for (let i in path) {
+          cells[[path[i].y, path[i].x]] = 3;
+        }
+        for (let i in wayPoint) {
+          cells[[wayPoint[i].y, wayPoint[i].x]] = 4;
+        }
+
+        let rotate = 0;
+        if (ox === 1 && oy === 0) rotate = 90;
+        else if (ox === 0 && oy === -1) rotate = 180;
+        else if (ox === -1 && oy === 0) rotate = 270;
+
+        this.setState({
+          robot: robot.center,
+          rotate,
+          cells,
+        });
       }
-      for (let i in wayPoint) {
-        cells[[wayPoint[i].y, wayPoint[i].x]] = 4;
-      }
-
-      let rotate = 0;
-      if (ox === 1 && oy === 0) rotate = 90;
-      else if (ox === 0 && oy === -1) rotate = 180;
-      else if (ox === -1 && oy === 0) rotate = 270;
-
-      this.setState({
-        robot: robot.center,
-        rotate,
-        cells,
-      })
     });
   }
 
