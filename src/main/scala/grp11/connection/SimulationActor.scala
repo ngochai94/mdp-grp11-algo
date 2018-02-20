@@ -22,8 +22,10 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
           forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(robot.getPosition, robot.getPerceivedMaze))
         }
       }
-      println(s"Finished exploration with ${robot.getPerceivedMaze.getCoverage}%" +
-        s" in ${(System.currentTimeMillis() - start) / 1000.0}s")
+      val notification = s"Finished exploration with ${robot.getPerceivedMaze.getCoverage}%" +
+        s" in ${(System.currentTimeMillis() - start) / 1000.0}s"
+      forwarder ! FwMessage(snapshot, ClientNotificationRepr.toJson(notification))
+      println(notification)
       println("Encoded map:\n" + robot.getPerceivedMaze.encodeExplored + "\n" + robot.getPerceivedMaze.encodeState)
     case ShortestPath(wayPoint) =>
       println(s"Starting shortest path with wayPoint = $wayPoint")
@@ -34,14 +36,20 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
         robot.getTurnCost,
         wayPoint
       )
-      val moves = Utils.path2Moves(path)
-      moves.foreach { move =>
-        robot.move(move)
-        forwarder ! FwMessage(
-          snapshot,
-          ClientBoardRepr.toJson(robot.getPosition, robot.getFinalMaze, path.map(_.center), wayPoint.toList)
-        )
+      val notification = if (path.isEmpty) {
+        s"No path found"
+      } else {
+        val moves = Utils.path2Moves(path)
+        moves.foreach { move =>
+          robot.move(move)
+          forwarder ! FwMessage(
+            snapshot,
+            ClientBoardRepr.toJson(robot.getPosition, robot.getFinalMaze, path.map(_.center), wayPoint.toList)
+          )
+        }
+        s"Finished shortest path after ${moves.length} moves"
       }
+      forwarder ! FwMessage(snapshot, ClientNotificationRepr.toJson(notification))
   }
 }
 

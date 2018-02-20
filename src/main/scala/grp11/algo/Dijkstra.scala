@@ -16,7 +16,10 @@ object Dijkstra {
     } { point =>
       val distanceMap = getDistanceMap(maze, start, turnCost)
       val position = distanceMap.filterKeys(_.center == point).minBy(_._2._1)._1
-      getPathWithDistanceMap(distanceMap, start, position) ++ apply(maze, position, end, turnCost, None).tail
+      val firstPath = getPathWithDistanceMap(distanceMap, start, position)
+      val secondPath = apply(maze, position, end, turnCost, None)
+      if (secondPath.isEmpty) firstPath
+      else firstPath ++ secondPath.tail
     }
   }
 
