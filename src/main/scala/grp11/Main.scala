@@ -1,17 +1,30 @@
 package grp11
 
-import grp11.algo.{Dijkstra, NearestHelpfulCell}
+import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
 import grp11.geometry.CellState._
 import grp11.geometry.{Cell, Maze}
-import grp11.connection.{FwMessage, RpiConnection, WebSocketServer}
+import grp11.connection._
 import grp11.robot.Orientation.Up
-import grp11.robot.{RobotPosition, Sensor, VirtualRobot}
+import grp11.robot.{RealRobot, RobotPosition, Sensor, VirtualRobot}
 
 import scala.io.StdIn
 
 
 object Main extends App {
-  new WebSocketServer
+  val server = new WebSocketServer
+  val rpiConnection = RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
+  val robot = new RealRobot(rpiConnection, server.forwarder)
+
+  val explorer = new WallHugging(robot)
+  println("starting")
+  while (!explorer.finished) {
+    for {
+      move <- explorer.step
+    } {
+      robot.move(move)
+    }
+  }
+  println("finished")
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -50,7 +63,7 @@ object Tmp {
     thread.start()
     while (true) {
       val msg = StdIn.readLine()
-      connection.send(msg)
+      connection.send(ArduinoMessage(msg))
     }
   }
 

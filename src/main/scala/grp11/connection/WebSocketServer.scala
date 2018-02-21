@@ -55,8 +55,8 @@ class WebSocketServer {
       HttpResponse(404, entity = "Unknown resource!")
   }
 
-  Http().bindAndHandleSync(requestHandler, interface = "localhost", port = 8080)
-  println(s"Server online at http://localhost:8080/\nPress Ctrl+C to stop...")
+  Http().bindAndHandleSync(requestHandler, interface = "localhost", port = 8000)
+  println(s"Server online at http://localhost:8000/\nPress Ctrl+C to stop...")
 
   def !(msg: Any): Unit = {
     forwarder ! msg

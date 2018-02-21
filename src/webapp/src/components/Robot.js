@@ -3,10 +3,10 @@ import RobotImg from '../robot.gif';
 
 export default class Robot extends Component {
   render() {
-    const height = 5;
-    const width = 5;
-    const left = (this.props.x - 2) * 1.66666;
-    const top = (21 - this.props.y) * 1.66666;
+    const height = 4;
+    const width = 4;
+    const left = (this.props.x - 2) * 1.66666 + 2.5 - width / 2;
+    const top = (21 - this.props.y) * 1.66666 + 2.5 - height / 2;
     const styles = {
       height: height + 'vw',
       width: width + 'vw',

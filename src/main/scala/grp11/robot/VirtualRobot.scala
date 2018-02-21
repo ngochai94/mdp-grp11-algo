@@ -5,8 +5,8 @@ import grp11.geometry.{Cell, Maze}
 import grp11.robot.Orientation.Up
 
 class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTime: Int) extends Robot {
-  val perceivedMaze = Maze()
-  var position = RobotPosition(Cell(2, 2), Up)
+  private[this] val perceivedMaze = Maze()
+  private[this] var position = RobotPosition(Cell(2, 2), Up)
 
   override def getPosition: RobotPosition = position
 

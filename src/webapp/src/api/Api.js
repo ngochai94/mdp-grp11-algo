@@ -1,6 +1,6 @@
 import Socket from 'simple-websocket';
 
-const WS_URL = 'ws://localhost:8080';
+const WS_URL = 'ws://localhost:8000';
 const socket = Socket(WS_URL);
 let connected = false;
 
