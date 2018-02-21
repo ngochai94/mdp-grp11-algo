@@ -9,4 +9,10 @@ case class RobotPosition(center: Cell, orientation: Orientation) {
     case TurnLeft => RobotPosition(center, orientation.turnLeft)
     case TurnRight => RobotPosition(center, orientation.turnRight)
   }
+
+  def contains(cell: Cell): Boolean = {
+    Math.abs(cell.x - center.x) <= 1 && Math.abs(cell.y - center.y) <= 1
+  }
+
+  def getHead: Cell = center + orientation * 1
 }

@@ -63,6 +63,23 @@ case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int
     }.mkString("\n")
   }
 
+  def getAndroidMap(position: RobotPosition): String = {
+    (1 to height).toList.reverse.map { row =>
+      (1 to width).foldLeft("") { case (s, col) =>
+        if (Cell(col, row) == position.getHead) s ++ "3"
+        else if (position.contains(Cell(col, row))) s ++ "4"
+        else {
+          val symbol = cells(Cell(col, row)) match {
+            case Unknown => "0"
+            case Empty => "1"
+            case Blocked => "2"
+          }
+          s ++ symbol
+        }
+      }
+    }.mkString("")
+  }
+
   def encodeExplored: String = {
     val exploredBin = List(1, 1) ++ (1 to height).toList.flatMap { row =>
       (1 to width).toList.map { col =>

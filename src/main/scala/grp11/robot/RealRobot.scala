@@ -55,6 +55,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
     }
     forwarder ! FwUpdate(snapshot)
     forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
+    connection.send(AndroidMessage(getPerceivedMaze.encodeExplored))
   }
 
   override def getPerceivedMaze: Maze = perceivedMaze
