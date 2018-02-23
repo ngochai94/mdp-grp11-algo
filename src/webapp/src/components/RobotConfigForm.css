@@ -1,4 +1,4 @@
-.setting, .setting-group .ant-input-group-wrapper {
+.setting, .setting-group .ant-input-group-wrapper, .setting-group .ant-radio-group {
   width: 100%;
   margin-bottom: 30px;
 }
@@ -11,3 +11,7 @@
   margin-top: 5vw;
 }
 
+.setting-group .ant-radio-button-wrapper {
+  width: 50%;
+  text-align: center;
+}

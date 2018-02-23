@@ -1,17 +1,21 @@
 package grp11.connection
 
 import akka.actor.{Actor, ActorRef}
-import grp11.algo.{Dijkstra, WallHugging}
+import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
 import grp11.geometry.Cell
 import grp11.robot.VirtualRobot
 import grp11.utils.Utils
 
 class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) extends Actor {
   override def receive: Receive = {
-    case ExploreStart(coverageLimit, timeLimit) =>
+    case ExploreStart(coverageLimit, timeLimit, explorerName) =>
       // Only use final maze for virtual sensors
       val start = System.currentTimeMillis()
-      val explorer = new WallHugging(robot, coverageLimit, timeLimit)
+      val explorer = explorerName match {
+        case "wall" => new WallHugging(robot, coverageLimit, timeLimit)
+        case "near" => new NearestHelpfulCell(robot, coverageLimit, timeLimit)
+        case _ => throw new Exception(s"Unknown explorerName = $explorerName")
+      }
       println(s"Starting exploration with coverageLimit = $coverageLimit% and timeLimit = ${timeLimit / 1000.0}s")
       while (!explorer.finished) {
         for {
@@ -54,5 +58,5 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
 }
 
 sealed trait SimulationActorMessage
-case class ExploreStart(coverageLimit: Double, timeLimit: Long) extends SimulationActorMessage
+case class ExploreStart(coverageLimit: Double, timeLimit: Long, explorer: String) extends SimulationActorMessage
 case class ShortestPath(wayPoint: Option[Cell]) extends SimulationActorMessage

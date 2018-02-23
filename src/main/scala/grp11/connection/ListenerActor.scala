@@ -15,6 +15,7 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
   var timeLimit: Long = 360000
   var wayPointX: Option[Int] = None
   var wayPointY: Option[Int] = None
+  var explorer: String = "wall"
 
   override def receive: Receive = {
     case "shortestpath" =>
@@ -33,7 +34,11 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
       val snapshot = Random.nextInt
       forwarder ! FwUpdate(snapshot)
       val simulationActor = context.actorOf(Props(classOf[SimulationActor], snapshot, forwarder, robot))
-      simulationActor ! ExploreStart(coverageLimit, timeLimit)
+      simulationActor ! ExploreStart(coverageLimit, timeLimit, explorer)
+
+    case s: String if s.startsWith("explorer") =>
+      explorer = s.split("\n").tail.head
+      println(s"Explorer is changed to $explorer")
 
     case s: String if s.startsWith("movetime") =>
       moveTime = s.split("\n").tail.head.toInt
