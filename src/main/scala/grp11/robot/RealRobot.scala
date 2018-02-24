@@ -19,28 +19,30 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
 
   override def sense(): Unit = {
     connection.send(ArduinoMessage(senseCommand))
-    val senseResults = connection.receive.split(senseResultSeparator).map(_.toInt).toList
+    val receivedMsg = connection.receiveArduino
+    val senseResults = receivedMsg.split(senseResultSeparator).map(_.toInt).toList
     if (senseResults.lengthCompare(getSensors.length) != 0) {
-      println(s"Malformed sense results: $senseResults")
+      println(s"Malformed sense results: $receivedMsg")
       sense()
-    }
-    senseResults.zip(getSensors).foreach { case(distance, sensor) =>
-      val (pos, orientation) = sensor.getState(position)
-      val emptyCells = if (distance == 0) sensor.range.length else distance - 1
-      sensor.range
-        .map(distance => pos + orientation * distance)
-        .take(emptyCells)
-        .filter(perceivedMaze.containsCell)
-        .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
-      if (distance != 0) {
-        val obstacle = pos + orientation * distance
-        if (perceivedMaze.containsCell(obstacle)) {
-          perceivedMaze.setState(obstacle, CellState.Blocked)
+    } else {
+      senseResults.zip(getSensors).foreach { case (distance, sensor) =>
+        val (pos, orientation) = sensor.getState(position)
+        val emptyCells = if (distance == 0) sensor.range.length else distance - 1
+        sensor.range
+          .map(distance => pos + orientation * distance)
+          .take(emptyCells)
+          .filter(perceivedMaze.containsCell)
+          .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
+        if (distance != 0) {
+          val obstacle = pos + orientation * distance
+          if (perceivedMaze.containsCell(obstacle)) {
+            perceivedMaze.setState(obstacle, CellState.Blocked)
+          }
         }
       }
+      forwarder ! FwUpdate(snapshot)
+      forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
     }
-    forwarder ! FwUpdate(snapshot)
-    forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
   }
 
   override def move(move: Move): Unit = {
@@ -55,7 +57,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
     }
     forwarder ! FwUpdate(snapshot)
     forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
-    connection.send(AndroidMessage(getPerceivedMaze.encodeExplored))
+    connection.send(AndroidMessage(getPerceivedMaze.getAndroidMap(getPosition)))
   }
 
   override def getPerceivedMaze: Maze = perceivedMaze

@@ -6,30 +6,56 @@ import grp11.geometry.{Cell, Maze}
 import grp11.connection._
 import grp11.robot.Orientation.Up
 import grp11.robot.{RealRobot, RobotPosition, Sensor, VirtualRobot}
+import grp11.utils.Utils
 
 import scala.io.StdIn
 
 
 object Main extends App {
-  val server = new WebSocketServer
-  val rpiConnection = RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
-  val robot = new RealRobot(rpiConnection, server.forwarder)
-
-  val explorer = new WallHugging(robot)
-  println("starting")
-  while (!explorer.finished) {
-    for {
-      move <- explorer.step
-    } {
-      robot.move(move)
-    }
-  }
-  println("finished")
+  Tmp.realRun()
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 
 object Tmp {
+  def realRun(): Unit = {
+    val server = new WebSocketServer
+    val rpiConnection = RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
+    val robot = new RealRobot(rpiConnection, server.forwarder)
+    var wayPoint = Cell(2, 2)
+
+    while (true) {
+      val androidSignal = rpiConnection.receiveAndroid
+      if (androidSignal == "start") {
+        val explorer = new WallHugging(robot)
+        println("starting real exploration")
+        while (!explorer.finished) {
+          for {
+            move <- explorer.step
+          } {
+            robot.move(move)
+          }
+        }
+        println("finished")
+      } else if (androidSignal == "shortpath") {
+        println("starting real shortest path")
+        val path = Dijkstra(robot.getPerceivedMaze,
+          robot.getPosition,
+          robot.getPerceivedMaze.getStop,
+          robot.getTurnCost,
+          Some(wayPoint)
+        )
+        val moves = Utils.path2Moves(path)
+        moves.foreach { move =>
+          robot.move(move)
+        }
+        s"Finished shortest path after ${moves.length} moves"
+      } else {
+        // TODO: finalize communication to update wayPoint
+      }
+    }
+  }
+
   def testExploration(): Unit = {
       val maze = Maze.emptyMaze
       val robot = new VirtualRobot(maze, Sensor.defaultSensors, 49, 50)
@@ -55,7 +81,7 @@ object Tmp {
       override def run(): Unit = {
         var received = " "
         while (received != "") {
-          received = connection.receive
+          received = connection.receiveArduino
           println("Received: " + received)
         }
       }

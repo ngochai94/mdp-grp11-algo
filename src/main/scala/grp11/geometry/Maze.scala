@@ -8,8 +8,15 @@ import scala.collection.mutable
 
 case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
   def containsCell(cell: Cell): Boolean = cells.contains(cell)
+
   def getState(cell: Cell): CellState = cells(cell)
-  def setState(cell: Cell, cellState: CellState): Unit = cells(cell) = cellState
+
+  def setState(cell: Cell, cellState: CellState): Unit = {
+    if (cells(cell) != Unknown && cells(cell) != cellState) {
+      println(s"Cell $cell was previously ${cells(cell)} and is now set to $cellState")
+    }
+    cells(cell) = cellState
+  }
 
   def isInside(cell: Cell): Boolean = {
     cell.x >= 1 && cell.x <= width && cell.y >= 1 && cell.y <= height
