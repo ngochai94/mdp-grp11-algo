@@ -2,12 +2,15 @@ package grp11.connection
 
 import java.net._
 import java.io._
+import java.util.concurrent.ConcurrentLinkedQueue
 
 case class RpiConnection(host: String, port: Int) {
   val s = new Socket(InetAddress.getByName(host), port)
   println("RPI is connected!")
   val in = new DataInputStream(s.getInputStream)
   val out = new PrintStream(s.getOutputStream)
+  val androidBuffer = new ConcurrentLinkedQueue[String]()
+  val arduinoBuffer = new ConcurrentLinkedQueue[String]()
 
   def send(msg: RpiMessage): Unit = {
     out.print(msg.toString)
@@ -15,7 +18,7 @@ case class RpiConnection(host: String, port: Int) {
     println(s"Sent $msg")
   }
 
-  def receive: String = {
+  private[this] def receive: String = {
     val b = Array.ofDim[Byte](RpiConnection.MaxLength)
     in.read(b)
     val s = b.map(_.toChar).mkString
@@ -23,7 +26,34 @@ case class RpiConnection(host: String, port: Int) {
     s.trim
   }
 
+  def receiveAndroid: String = {
+    while (androidBuffer.peek == null) {}
+    androidBuffer.poll
+  }
+
+  def receiveArduino: String = {
+    while (arduinoBuffer.peek == null) {}
+    arduinoBuffer.poll
+  }
+
   def close(): Unit = s.close()
+
+  val thread = new Thread {
+    override def run(): Unit = {
+      while (true) {
+        val received = receive
+        if (received != "") {
+          println(s"Received: $received")
+          if (received.startsWith("AN.*")) {
+            androidBuffer.add(received.substring(4))
+          } else {
+            arduinoBuffer.add(received)
+          }
+        }
+      }
+    }
+  }
+  thread.start()
 }
 
 object RpiConnection {
