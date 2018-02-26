@@ -8,6 +8,7 @@ import './components/Notification';
 import './App.css';
 import 'antd/dist/antd.css';
 import MapUploader from "./components/MapUploader";
+import ConnectionStatus from "./components/ConnectionStatus";
 
 const { Header } = Layout;
 
@@ -104,7 +105,8 @@ class App extends Component {
     return (
       <Layout>
         <Header>
-          <div className="header-text">Board Visualization</div>
+          <span className="header-text">Board Visualization</span>
+          <ConnectionStatus/>
         </Header>
         {boards}
       </Layout>

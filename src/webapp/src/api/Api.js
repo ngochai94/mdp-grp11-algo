@@ -66,6 +66,10 @@ function updateExplorer(explorer) {
   send("explorer\n" + explorer);
 }
 
+function isConnected() {
+  return connected;
+}
+
 export default {
   updateMoveTime,
   updateTurnTime,
@@ -77,6 +81,7 @@ export default {
   updateWayPointX,
   updateWayPointY,
   updateExplorer,
+  isConnected,
   register: (cb) => {
     socket.on('data', (data) => {
       const s = new TextDecoder("utf-8").decode(data);
