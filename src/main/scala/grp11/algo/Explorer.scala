@@ -43,7 +43,6 @@ class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit:
       val moves = Utils.path2Moves(path)
       List(moves.head)
     } else {
-      println("Finding way back")
       val path = Dijkstra(robot.getPerceivedMaze, robot.getPosition, Cell(2, 2), robot.getTurnCost)
       val moves = Utils.path2Moves(path)
       List(moves.head)
@@ -83,7 +82,6 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
         }
       }
     } else {
-      println("Finding way back")
       val path = Dijkstra(robot.getPerceivedMaze, robot.getPosition, Cell(2, 2), robot.getTurnCost)
       val moves = Utils.path2Moves(path)
       List(moves.head)

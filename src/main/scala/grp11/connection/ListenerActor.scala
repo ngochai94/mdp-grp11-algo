@@ -68,6 +68,7 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
 
     case s: String if s.startsWith("map") =>
       val map = s.split("\n").tail
+      val newMaze = Maze()
       for {
         row <- 1 to map.length
         col <- 1 to map(0).length
@@ -77,8 +78,10 @@ class ListenerActor(forwarder: ActorRef) extends Actor {
           case '2' => Blocked
         }
       } {
-        maze.setState(Cell(col, row), state)
+        newMaze.setState(Cell(col, row), state)
       }
+      maze = newMaze
+
     case msg =>
       println(s"Listener got unknown message $msg")
   }
