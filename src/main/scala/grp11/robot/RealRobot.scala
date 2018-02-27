@@ -51,9 +51,9 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
       throw new Exception("move to a invalid position")
     }
     move match {
-      case TurnLeft => connection.send(ArduinoMessage("L"))
-      case TurnRight => connection.send(ArduinoMessage("R"))
-      case Forward => connection.send(ArduinoMessage("F"))
+      case TurnLeft => connection.send(ArduinoMessage(turnLeftCommand))
+      case TurnRight => connection.send(ArduinoMessage(turnRightCommand))
+      case Forward => connection.send(ArduinoMessage(goStraightCommand))
     }
     forwarder ! FwUpdate(snapshot)
     forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
@@ -70,5 +70,8 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
 
 object RealRobot {
   val senseCommand = "C"
+  val turnLeftCommand = "L"
+  val turnRightCommand = "R"
+  val goStraightCommand = "F"
   val senseResultSeparator = ":"
 }
