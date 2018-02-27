@@ -53,11 +53,14 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
     move match {
       case TurnLeft => connection.send(ArduinoMessage("L"))
       case TurnRight => connection.send(ArduinoMessage("R"))
-      case Forward => connection.send(ArduinoMessage("S"))
+      case Forward => connection.send(ArduinoMessage("F"))
     }
     forwarder ! FwUpdate(snapshot)
     forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
-    connection.send(AndroidMessage(getPerceivedMaze.getAndroidMap(getPosition)))
+
+    val androidMessage = AndroidBoardRepr.toJson(
+      perceivedMaze.getAndroidMap(position), perceivedMaze.encodeExplored, perceivedMaze.encodeState)
+    connection.send(AndroidMessage(androidMessage))
   }
 
   override def getPerceivedMaze: Maze = perceivedMaze
@@ -66,6 +69,6 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
 }
 
 object RealRobot {
-  val senseCommand = "sense"
+  val senseCommand = "C"
   val senseResultSeparator = ":"
 }

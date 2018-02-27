@@ -18,11 +18,11 @@ case class Sensor(relX: Int, relY: Int, relOrientation: Orientation, range: List
 
 object Sensor {
   val defaultSensors = List(
-    Sensor(-1, 1, Up, List(1, 2, 3)), // front left
     Sensor(1, 1, Up, List(1, 2, 3)), // front right
     Sensor(0, 1, Up, List(1, 2, 3)), // front middle
-    Sensor(-1, 1, Left, List(1, 2, 3)), // left
-//    Sensor(-1, 0, Left, List(1, 2, 3)),
+    Sensor(-1, 1, Up, List(1, 2, 3)), // front left
+    Sensor(-1, 1, Left, List(1, 2, 3)), // left front
+    Sensor(-1, -1, Left, List(1, 2, 3)), // left back
     Sensor(1, 1, Right, List(1, 2, 3)) // right
   )
 }

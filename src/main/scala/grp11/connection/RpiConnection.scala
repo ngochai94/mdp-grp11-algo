@@ -22,7 +22,6 @@ case class RpiConnection(host: String, port: Int) {
     val b = Array.ofDim[Byte](RpiConnection.MaxLength)
     in.read(b)
     val s = b.map(_.toChar).mkString
-    println(s"Received |$s|")
     s.trim
   }
 
@@ -43,7 +42,7 @@ case class RpiConnection(host: String, port: Int) {
       while (true) {
         val received = receive
         if (received != "") {
-          println(s"Received: $received")
+          println(s"Received |$received|")
           if (received.startsWith("AN.*")) {
             androidBuffer.add(received.substring(4))
           } else {
@@ -57,6 +56,7 @@ case class RpiConnection(host: String, port: Int) {
 }
 
 object RpiConnection {
+//  val DefaultHost = "192.168.200.11"
 //  val DefaultHost = "172.21.147.242"
   val DefaultHost = "127.0.0.1"
   val DefaultPort = 8080

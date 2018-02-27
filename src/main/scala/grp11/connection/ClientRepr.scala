@@ -34,3 +34,13 @@ object ClientNotificationRepr {
     gson.toJson(repr)
   }
 }
+
+case class AndroidBoardRepr(maze: String, descriptorStringOne: String, descriptorStringTwo: String)
+
+object AndroidBoardRepr {
+  def toJson(maze: String, desc1: String, desc2: String): String = {
+    val gson = new Gson
+    val repr = AndroidBoardRepr(maze, desc1, desc2)
+    gson.toJson(repr)
+  }
+}
