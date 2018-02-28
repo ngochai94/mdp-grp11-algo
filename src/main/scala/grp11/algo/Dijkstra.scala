@@ -24,10 +24,10 @@ object Dijkstra {
   }
 
   def getPathWithDistanceMap(
-                              distanceMap: mutable.HashMap[RobotPosition,(Double, RobotPosition)],
-                              start: RobotPosition,
-                              target: RobotPosition
-                            ): List[RobotPosition] = {
+    distanceMap: mutable.HashMap[RobotPosition,(Double, RobotPosition)],
+    start: RobotPosition,
+    target: RobotPosition
+  ): List[RobotPosition] = {
 
     var position = target
     if (distanceMap(position)._1 == Double.MaxValue) {

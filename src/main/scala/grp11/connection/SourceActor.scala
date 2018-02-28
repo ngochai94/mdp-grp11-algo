@@ -9,6 +9,7 @@ class SourceActor(forwarder: ActorRef) extends ActorPublisher[String] {
   override def preStart(): Unit = {
     forwarder ! AddRoutee(ActorRefRoutee(self))
   }
+
   override def receive: Receive = {
     case msg: String => onNext(msg)
     case Request(_) => // Do nothing

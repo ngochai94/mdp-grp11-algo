@@ -4,7 +4,7 @@ import java.net._
 import java.io._
 import java.util.concurrent.ConcurrentLinkedQueue
 
-case class RpiConnection(host: String, port: Int) {
+class RpiConnection(host: String, port: Int) {
   val s = new Socket(InetAddress.getByName(host), port)
   println("RPI is connected!")
   val in = new DataInputStream(s.getInputStream)

@@ -38,6 +38,7 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
       forwarder ! FwMessage(snapshot, ClientNotificationRepr.toJson(notification))
       println(notification)
       println("Encoded map:\n" + robot.getPerceivedMaze.encodeExplored + "\n" + robot.getPerceivedMaze.encodeState)
+
     case ShortestPath(wayPoint) =>
       println(s"Starting shortest path with wayPoint = $wayPoint")
       // Always use final maze in shortest path calculation
