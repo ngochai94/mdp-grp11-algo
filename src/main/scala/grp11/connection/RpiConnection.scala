@@ -56,9 +56,9 @@ class RpiConnection(host: String, port: Int) {
 }
 
 object RpiConnection {
-//  val DefaultHost = "192.168.200.11"
+  val DefaultHost = "192.168.200.11"
 //  val DefaultHost = "172.21.147.242"
-  val DefaultHost = "127.0.0.1"
+//  val DefaultHost = "127.0.0.1"
   val DefaultPort = 8080
   val MaxLength = 1024
 }
