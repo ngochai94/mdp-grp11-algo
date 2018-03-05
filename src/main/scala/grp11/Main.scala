@@ -1,7 +1,7 @@
 package grp11
 
 import grp11.algo.{Dijkstra, WallHugging}
-import grp11.geometry.{Cell, Maze}
+import grp11.geometry.{Cell, CellState, Maze}
 import grp11.connection._
 import grp11.robot.{RealRobot, Sensor, VirtualRobot}
 import grp11.utils.Utils
@@ -12,6 +12,7 @@ import scala.io.StdIn
 object Main extends App {
   Tmp.realRun
 //  Tmp.testWS
+//  Tmp.testConnectRpi()
 }
 
 object Tmp {
@@ -22,13 +23,13 @@ object Tmp {
   def realRun(): Unit = {
     val server = new WebSocketServer
     val rpiConnection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
-    val robot = new RealRobot(rpiConnection, server.forwarder)
-//    val robot = new VirtualRobot(Maze.emptyMaze, Sensor.defaultSensors, 500, 600)
+    var robot = new RealRobot(rpiConnection, server.forwarder)
     var wayPoint = Cell(2, 2)
 
     while (true) {
       val androidSignal = rpiConnection.receiveAndroid
       if (androidSignal == exploreSignal) {
+        robot = new RealRobot(rpiConnection, server.forwarder)
         val explorer = new WallHugging(robot)
         println("starting real exploration")
         while (!explorer.finished) {
@@ -36,14 +37,6 @@ object Tmp {
             move <- explorer.step
           } {
             robot.move(move)
-//            server ! FwUpdate(1)
-//            server ! FwMessage(1, ClientBoardRepr.toJson(robot.getPosition, robot.getPerceivedMaze))
-//            val androidMessage = AndroidBoardRepr.toJson(
-//              robot.getPerceivedMaze.getAndroidMap(robot.getPosition),
-//              robot.getPerceivedMaze.encodeExplored,
-//              robot.getPerceivedMaze.encodeState
-//            )
-//            rpiConnection.send(AndroidMessage(androidMessage))
           }
         }
         println("finished")
@@ -58,14 +51,6 @@ object Tmp {
         val moves = Utils.path2Moves(path)
         moves.foreach { move =>
           robot.move(move)
-//          server ! FwUpdate(1)
-//          server ! FwMessage(1, ClientBoardRepr.toJson(robot.getPosition, robot.getPerceivedMaze))
-//          val androidMessage = AndroidBoardRepr.toJson(
-//            robot.getPerceivedMaze.getAndroidMap(robot.getPosition),
-//            robot.getPerceivedMaze.encodeExplored,
-//            robot.getPerceivedMaze.encodeState
-//          )
-//          rpiConnection.send(AndroidMessage(androidMessage))
         }
         s"Finished shortest path after ${moves.length} moves"
       } else if (androidSignal.startsWith(wayPointSignal)) {
@@ -99,6 +84,7 @@ object Tmp {
     thread.start()
     while (true) {
       val msg = StdIn.readLine()
+      connection.send(AndroidMessage(msg))
       connection.send(ArduinoMessage(msg))
     }
   }

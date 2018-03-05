@@ -9,8 +9,8 @@ import scala.collection.mutable
 
 sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: Long) {
   private[algo] val visited = mutable.HashMap[RobotPosition, Boolean]()
-  private[this] val height = robot.getPerceivedMaze.height
-  private[this] val width = robot.getPerceivedMaze.width
+  private[this] val height = robot.getPerceivedMaze.getHeight
+  private[this] val width = robot.getPerceivedMaze.getWidth
 
   for {
     row <- 1 to height

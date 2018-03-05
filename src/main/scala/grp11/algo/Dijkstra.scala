@@ -47,7 +47,9 @@ object Dijkstra {
     val currentMap = mutable.PriorityQueue[(Double, RobotPosition, RobotPosition)]((0.0, start, start))(Ordering.by(-_._1))
     val finalMap = mutable.HashMap[RobotPosition, (Double, RobotPosition)](start -> (0.0, start))
     for {
-      (cell, _) <- maze.cells
+      row <- 2 until maze.getHeight
+      col <- 2 until maze.getWidth
+      cell = Cell(col, row)
       orientation <- Orientation.all
       robotPosition = RobotPosition(cell, orientation)
       if robotPosition != start

@@ -5,6 +5,7 @@ import grp11.geometry.{Cell, CellState, Maze}
 import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
 import grp11.robot.Orientation.Up
 
+import scala.io.StdIn
 import scala.util.Random
 
 class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
@@ -46,9 +47,10 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
   }
 
   override def move(move: Move): Unit = {
+    StdIn.readLine
     position = position.applyMove(move)
     if (!perceivedMaze.isValidPosition(position)) {
-      throw new Exception("move to a invalid position")
+      throw new Exception(s"move to an invalid position $position")
     }
     move match {
       case TurnLeft => connection.send(ArduinoMessage(turnLeftCommand))
@@ -56,7 +58,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
       case Forward => connection.send(ArduinoMessage(goStraightCommand))
     }
     forwarder ! FwUpdate(snapshot)
-    forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(getPosition, getPerceivedMaze))
+    forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(position, perceivedMaze))
 
     val androidMessage = AndroidBoardRepr.toJson(
       perceivedMaze.getAndroidMap(position), perceivedMaze.encodeExplored, perceivedMaze.encodeState)
@@ -69,7 +71,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
 }
 
 object RealRobot {
-  val senseCommand = "C"
+  val senseCommand = "A"
   val turnLeftCommand = "L"
   val turnRightCommand = "R"
   val goStraightCommand = "F"

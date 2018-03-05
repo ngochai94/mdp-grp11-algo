@@ -6,10 +6,14 @@ import grp11.utils.Utils
 
 import scala.collection.mutable
 
-case class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
+class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
   def containsCell(cell: Cell): Boolean = cells.contains(cell)
 
   def getState(cell: Cell): CellState = cells(cell)
+
+  def getCells: mutable.HashMap[Cell, CellState] = cells
+  def getHeight: Int = height
+  def getWidth: Int = width
 
   def setState(cell: Cell, cellState: CellState): Unit = {
     if (cells(cell) != Unknown && cells(cell) != cellState) {
