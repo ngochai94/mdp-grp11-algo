@@ -82,7 +82,9 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
         }
       }
     } else {
-      val path = Dijkstra(robot.getPerceivedMaze, robot.getPosition, Cell(2, 2), robot.getTurnCost)
+      val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
+      val position = RobotPosition(Cell(2, 2), Orientation.Up)
+      val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, position)
       val moves = Utils.path2Moves(path)
       List(moves.head)
     }
