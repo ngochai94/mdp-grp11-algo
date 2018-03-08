@@ -23,7 +23,7 @@ sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: L
   private[this] val start = System.currentTimeMillis()
   private[algo] def shouldFinish: Boolean = robot.getPerceivedMaze.getCoverage >= coverageLimit ||
     System.currentTimeMillis() - start >= timeLimit
-  def finished: Boolean = shouldFinish && robot.getPosition.center == Cell(2, 2)
+  def finished: Boolean = shouldFinish && robot.getPosition == RobotPosition(Cell(2, 2), Orientation.Up)
 
   def step: List[Move]
 }
@@ -43,7 +43,9 @@ class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit:
       val moves = Utils.path2Moves(path)
       List(moves.head)
     } else {
-      val path = Dijkstra(robot.getPerceivedMaze, robot.getPosition, Cell(2, 2), robot.getTurnCost)
+      val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
+      val position = RobotPosition(Cell(2, 2), Orientation.Up)
+      val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, position)
       val moves = Utils.path2Moves(path)
       List(moves.head)
     }
