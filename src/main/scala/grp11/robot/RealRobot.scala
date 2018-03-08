@@ -28,16 +28,35 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
     } else {
       senseResults.zip(getSensors).foreach { case (distance, sensor) =>
         val (pos, orientation) = sensor.getState(position)
-        val emptyCells = if (distance == 0) sensor.range.length else distance - 1
-        sensor.range
-          .map(distance => pos + orientation * distance)
-          .take(emptyCells)
-          .filter(perceivedMaze.containsCell)
-          .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
-        if (distance != 0) {
-          val obstacle = pos + orientation * distance
-          if (perceivedMaze.containsCell(obstacle)) {
-            perceivedMaze.setState(obstacle, CellState.Blocked)
+        if (sensor.range.lengthCompare(3) <= 0) {
+          val emptyCells = if (distance == 0) sensor.range.length else distance - 1
+          sensor.range
+            .map(distance => pos + orientation * distance)
+            .take(emptyCells)
+            .filter(perceivedMaze.containsCell)
+            .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
+          if (distance != 0) {
+            val obstacle = pos + orientation * distance
+            if (perceivedMaze.containsCell(obstacle)) {
+              perceivedMaze.setState(obstacle, CellState.Blocked)
+            }
+          }
+        } else { // handle long sensor differently due to lower accuracy
+          if (distance == 0 || distance > 4) {
+            List(1, 2, 3, 4)
+              .map(distance => pos + orientation * distance)
+              .filter(perceivedMaze.containsCell)
+              .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
+          } else if (distance == 3 || distance == 4) {
+            (1 until distance)
+              .toList
+              .map(distance => pos + orientation * distance)
+              .filter(perceivedMaze.containsCell)
+              .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
+            val obstacle = pos + orientation * distance
+            if (perceivedMaze.containsCell(obstacle)) {
+              perceivedMaze.setState(obstacle, CellState.Blocked)
+            }
           }
         }
       }
