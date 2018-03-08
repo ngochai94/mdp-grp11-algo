@@ -1,6 +1,6 @@
 package grp11
 
-import grp11.algo.{Dijkstra, WallHugging}
+import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
 import grp11.geometry.{Cell, CellState, Maze}
 import grp11.connection._
 import grp11.robot.{RealRobot, Sensor, VirtualRobot}
@@ -31,6 +31,7 @@ object Tmp {
       if (androidSignal == exploreSignal) {
         robot = new RealRobot(rpiConnection, server.forwarder)
         val explorer = new WallHugging(robot)
+        //        val explorer = new NearestHelpfulCell(robot)
         println("starting real exploration")
         while (!explorer.finished) {
           for {
