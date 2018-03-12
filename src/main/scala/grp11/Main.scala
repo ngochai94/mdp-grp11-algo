@@ -16,9 +16,9 @@ object Main extends App {
 }
 
 object Tmp {
-  val exploreSignal = "startExploration"
-  val shortestPathSignal = "startShortestPath"
-  val wayPointSignal = "wayPoint"
+  val exploreSignal = "a"
+  val shortestPathSignal = "b"
+  val wayPointSignal = "c"
 
   def realRun(): Unit = {
     val server = new WebSocketServer

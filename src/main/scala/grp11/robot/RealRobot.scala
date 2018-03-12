@@ -21,11 +21,12 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
   override def sense(): Unit = {
     connection.send(ArduinoMessage(senseCommand))
     val receivedMsg = connection.receiveArduino
-    val senseResults = receivedMsg.split(senseResultSeparator).map(_.toInt).toList
-    if (senseResults.lengthCompare(getSensors.length) != 0) {
+    val rawSenseResults = receivedMsg.split(senseResultSeparator)
+    if (rawSenseResults.lengthCompare(getSensors.length) != 0) {
       println(s"Malformed sense results: $receivedMsg")
       sense()
     } else {
+      val senseResults = rawSenseResults.map(_.toInt).toList
       senseResults.zip(getSensors).foreach { case (distance, sensor) =>
         val (pos, orientation) = sensor.getState(position)
         if (sensor.range.lengthCompare(3) <= 0) {

@@ -19,7 +19,9 @@ class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
     if (cells(cell) != Unknown && cells(cell) != cellState) {
       println(s"Cell $cell was previously ${cells(cell)} and is now set to $cellState")
     }
-    cells(cell) = cellState
+    if (cells(cell) != Empty) { // always trust the first read of empty cell
+      cells(cell) = cellState
+    }
   }
 
   def isInside(cell: Cell): Boolean = {
