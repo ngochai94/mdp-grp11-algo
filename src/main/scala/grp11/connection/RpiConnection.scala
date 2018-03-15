@@ -32,9 +32,9 @@ class RpiConnection(host: String, port: Int) {
   }
 
   def receiveAndroid: String = {
-//    while (androidBuffer.peek == null) {}
-//    androidBuffer.poll
-    StdIn.readLine
+    while (androidBuffer.peek == null) {}
+    androidBuffer.poll
+//    StdIn.readLine
   }
 
   def receiveArduino: String = {

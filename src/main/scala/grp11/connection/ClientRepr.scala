@@ -35,12 +35,32 @@ object ClientNotificationRepr {
   }
 }
 
-case class AndroidBoardRepr(maze: String, descriptorStringOne: String, descriptorStringTwo: String)
+case class AndroidBoardRepr(m: String, d: String, e: String)
 
 object AndroidBoardRepr {
   def toJson(maze: String, desc1: String, desc2: String): String = {
     val gson = new Gson
     val repr = AndroidBoardRepr(maze, desc1, desc2)
+    gson.toJson(repr)
+  }
+}
+
+case class AndroidExplorationTimeRepr(f: String)
+
+object AndroidExplorationTimeRepr {
+  def toJson(msg: String) = {
+    val gson = new Gson
+    val repr = AndroidExplorationTimeRepr(msg)
+    gson.toJson(repr)
+  }
+}
+
+case class AndroidShortestPathTimeRepr(g: String)
+
+object AndroidShortestPathTimeRepr {
+  def toJson(msg: String) = {
+    val gson = new Gson
+    val repr = AndroidShortestPathTimeRepr(msg)
     gson.toJson(repr)
   }
 }

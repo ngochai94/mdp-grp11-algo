@@ -19,7 +19,10 @@ class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
     if (cells(cell) != Unknown && cells(cell) != cellState) {
       println(s"Cell $cell was previously ${cells(cell)} and is now set to $cellState")
     }
-    if (cells(cell) != Empty) { // always trust the first read of empty cell
+    if ((isInsideEndArea(cell) || isInsideEndArea(cell)) && cellState == Blocked) {
+      println("Attempting to modify start or end area")
+      cells(cell) = Empty
+    } else if (cells(cell) != Empty) { // always trust the first read of empty cell
       cells(cell) = cellState
     }
   }
@@ -131,6 +134,22 @@ class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
         s ++ symbol
       }
     }.mkString("\n")
+  }
+
+  private[this] def isInsideStartArea(cell: Cell): Boolean = {
+    val startArea = for {
+      row <- 1 to 3
+      col <- 1 to 3
+    } yield Cell(col, row)
+    startArea.contains(cell)
+  }
+
+  private[this] def isInsideEndArea(cell: Cell): Boolean = {
+    val startArea = for {
+      row <- height - 2 to height
+      col <- width - 2 to width
+    } yield Cell(col, row)
+    startArea.contains(cell)
   }
 }
 

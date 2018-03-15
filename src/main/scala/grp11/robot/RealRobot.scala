@@ -48,7 +48,8 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
               .map(distance => pos + orientation * distance)
               .filter(perceivedMaze.containsCell)
               .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
-          } else if (distance == 3 || distance == 4) {
+          //} else if (distance == 3 || distance == 4) {
+          } else {
             (1 until distance)
               .toList
               .map(distance => pos + orientation * distance)
@@ -67,7 +68,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
   }
 
   override def move(move: Move): Unit = {
-    StdIn.readLine
+    //StdIn.readLine
     position = position.applyMove(move)
     if (!perceivedMaze.isValidPosition(position)) {
       throw new Exception(s"move to an invalid position $position")

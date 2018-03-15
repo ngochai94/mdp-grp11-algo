@@ -25,14 +25,17 @@ object Tmp {
     val rpiConnection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
     var robot = new RealRobot(rpiConnection, server.forwarder)
     var wayPoint = Cell(2, 2)
+    var explorationDone = false
 
     while (true) {
       val androidSignal = rpiConnection.receiveAndroid
-      if (androidSignal == exploreSignal) {
+      if (androidSignal == exploreSignal && !explorationDone) {
+        explorationDone = true
         robot = new RealRobot(rpiConnection, server.forwarder)
         val explorer = new WallHugging(robot)
         //        val explorer = new NearestHelpfulCell(robot)
         println("starting real exploration")
+        val start = System.currentTimeMillis
         while (!explorer.finished) {
           for {
             move <- explorer.step
@@ -40,9 +43,12 @@ object Tmp {
             robot.move(move)
           }
         }
+        val elapsed = (System.currentTimeMillis - start) / 1000
+        rpiConnection.send(AndroidMessage(AndroidExplorationTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
         println("finished")
       } else if (androidSignal == shortestPathSignal) {
         println("starting real shortest path")
+        val start = System.currentTimeMillis
         val path = Dijkstra(robot.getPerceivedMaze,
           robot.getPosition,
           robot.getPerceivedMaze.getStop,
@@ -53,6 +59,8 @@ object Tmp {
         moves.foreach { move =>
           robot.move(move)
         }
+        val elapsed = (System.currentTimeMillis - start) / 1000
+        rpiConnection.send(AndroidMessage(AndroidShortestPathTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
         s"Finished shortest path after ${moves.length} moves"
       } else if (androidSignal.startsWith(wayPointSignal)) {
         val coordinates = androidSignal.substring(wayPointSignal.length + 1, androidSignal.length - 1)
@@ -60,6 +68,9 @@ object Tmp {
         val x = 1 + coordinates.head
         val y = 20 - coordinates.tail.head
         wayPoint = Cell(x, y)
+      } else {
+        println("Forwarding msg to arduino...")
+        rpiConnection.send(ArduinoMessage(androidSignal))
       }
     }
   }
