@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import scala.io.StdIn
 
 class RpiConnection(host: String, port: Int) {
-  val s = new Socket(InetAddress.getByName(host), port)
+  var s = new Socket(InetAddress.getByName(host), port)
   println("RPI is connected!")
   val in = new DataInputStream(s.getInputStream)
   val out = new PrintStream(s.getOutputStream)
@@ -15,26 +15,39 @@ class RpiConnection(host: String, port: Int) {
   val arduinoBuffer = new ConcurrentLinkedQueue[String]()
 
   def send(msg: RpiMessage): Unit = {
-    out.println(msg.toString)
-    out.flush()
-    msg match {
-      case ArduinoMessage(s) => println(s"Sent $msg")
-      case _ =>
+    try {
+      out.println(msg.toString)
+      out.flush()
+      msg match {
+        case ArduinoMessage(s) => println(s"Sent $msg")
+        case _ =>
+      }
+    } catch {
+      case e: SocketException =>
+        println(e)
+        s = new Socket(InetAddress.getByName(host), port)
+        send(msg)
     }
-//    println(s"Sent $msg")
   }
 
   private[this] def receive: String = {
-    val b = Array.ofDim[Byte](RpiConnection.MaxLength)
-    in.read(b)
-    val s = b.map(_.toChar).mkString
-    s.trim
+    try {
+      val b = Array.ofDim[Byte](RpiConnection.MaxLength)
+      in.read(b)
+      val s = b.map(_.toChar).mkString
+      s.trim
+    } catch {
+      case e: SocketException =>
+        println(e)
+        s = new Socket(InetAddress.getByName(host), port)
+        receive
+    }
   }
 
   def receiveAndroid: String = {
-    while (androidBuffer.peek == null) {}
-    androidBuffer.poll
-//    StdIn.readLine
+//    while (androidBuffer.peek == null) {}
+//    androidBuffer.poll
+    StdIn.readLine
   }
 
   def receiveArduino: String = {
