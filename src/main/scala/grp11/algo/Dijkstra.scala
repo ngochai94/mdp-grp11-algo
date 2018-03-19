@@ -11,12 +11,22 @@ object Dijkstra {
   def apply(maze: Maze, start: RobotPosition, end: Cell, turnCost: Double, wayPoint: Option[Cell] = None): List[RobotPosition] = {
     wayPoint.fold {
       val distanceMap = getDistanceMap(maze, start, turnCost)
+      if (distanceMap.filterKeys(_.center == end).isEmpty) {
+        println("No path found")
+        println(maze)
+      }
       val position = distanceMap.filterKeys(_.center == end).minBy(_._2._1)._1
       getPathWithDistanceMap(distanceMap, start, position)
     } { point =>
+      println("starting dijkstra")
       val distanceMap = getDistanceMap(maze, start, turnCost)
+      if (distanceMap.filterKeys(_.center == point).isEmpty) {
+        println("No path found")
+        println(maze)
+      }
       val position = distanceMap.filterKeys(_.center == point).minBy(_._2._1)._1
       val firstPath = getPathWithDistanceMap(distanceMap, start, position)
+      println("first path found")
       val secondPath = apply(maze, position, end, turnCost, None)
       if (secondPath.isEmpty) firstPath
       else firstPath ++ secondPath.tail

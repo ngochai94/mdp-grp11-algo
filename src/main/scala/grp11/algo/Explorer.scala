@@ -11,6 +11,7 @@ sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: L
   private[algo] val visited = mutable.HashMap[RobotPosition, Boolean]()
   private[this] val height = robot.getPerceivedMaze.getHeight
   private[this] val width = robot.getPerceivedMaze.getWidth
+  private[algo] var forcedStop = false
 
   for {
     row <- 1 to height
@@ -21,7 +22,7 @@ sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: L
   }
 
   private[this] val start = System.currentTimeMillis()
-  private[algo] def shouldFinish: Boolean = robot.getPerceivedMaze.getCoverage >= coverageLimit ||
+  private[algo] def shouldFinish: Boolean = forcedStop || robot.getPerceivedMaze.getCoverage >= coverageLimit ||
     System.currentTimeMillis() - start >= timeLimit
   def finished: Boolean = shouldFinish && robot.getPosition == RobotPosition(Cell(2, 2), Orientation.Up)
 
@@ -66,12 +67,17 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
       if (looped) {
         visited(robot.getPosition) = true
         val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
-        val target = distanceMap.filterKeys(position => !visited(position))
+        val targets = distanceMap.filterKeys(position => !visited(position))
           .filterKeys(position => robot.getPerceivedMaze.isHelpfulPosition(position, robot.getSensors))
-          .minBy(_._2._1)._1
-        val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
-        val moves = Utils.path2Moves(path)
-        List(moves.head)
+        if (targets.isEmpty) {
+          forcedStop = true
+          Nil
+        } else {
+          val target = targets.minBy(_._2._1)._1
+          val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
+          val moves = Utils.path2Moves(path)
+          List(moves.head)
+        }
       } else {
         val position = robot.getPosition
         visited(position) = true

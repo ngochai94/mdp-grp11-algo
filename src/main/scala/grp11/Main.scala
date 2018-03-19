@@ -3,6 +3,7 @@ package grp11
 import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
 import grp11.geometry.{Cell, CellState, Maze}
 import grp11.connection._
+import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
 import grp11.robot.{RealRobot, Sensor, VirtualRobot}
 import grp11.utils.Utils
 
@@ -45,9 +46,12 @@ object Tmp {
         }
         val elapsed = (System.currentTimeMillis - start) / 1000
         rpiConnection.send(AndroidMessage(AndroidExplorationTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
-        println("finished")
+        println(robot.getPerceivedMaze.encodeExplored)
+        println(robot.getPerceivedMaze.encodeState)
+        println(s"finished in $elapsed seconds")
+        rpiConnection.send(ArduinoMessage("C")) // calibrate after exploration
       } else if (androidSignal == shortestPathSignal) {
-        println("starting real shortest path")
+        println(s"starting real shortest path with waypoint = $wayPoint")
         val start = System.currentTimeMillis
         val path = Dijkstra(robot.getPerceivedMaze,
           robot.getPosition,
@@ -55,10 +59,19 @@ object Tmp {
           robot.getTurnCost,
           Some(wayPoint)
         )
+        println("finished calculation")
         val moves = Utils.path2Moves(path)
-        moves.foreach { move =>
-          robot.move(move)
-        }
+        println("finished getting moves")
+//        moves.foreach { move =>
+//          robot.move(move)
+//        }
+        val msg = moves.map {
+          case Forward => "F"
+          case TurnRight => "R"
+          case TurnLeft => "L"
+        }.mkString
+        println(s"Sending bulk msg $msg")
+        rpiConnection.send(ArduinoMessage(msg))
         val elapsed = (System.currentTimeMillis - start) / 1000
         rpiConnection.send(AndroidMessage(AndroidShortestPathTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
         s"Finished shortest path after ${moves.length} moves"
