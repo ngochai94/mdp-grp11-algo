@@ -10,6 +10,9 @@
 **UI Development**
 `cd src/webapp && npm start`
 
+**Packaging**
+`sbt assembly`
+
 ## Details
 * Server uses Scala to implement 2 different algorithms for exploration
   * Wall hugging: always turn robot with this priorities: Left > Forward > Right
