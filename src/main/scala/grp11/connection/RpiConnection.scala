@@ -8,11 +8,13 @@ import scala.io.StdIn
 
 class RpiConnection(host: String, port: Int) {
   var s = new Socket(InetAddress.getByName(host), port)
-  println("RPI is connected!")
   val in = new DataInputStream(s.getInputStream)
   val out = new PrintStream(s.getOutputStream)
+
   val androidBuffer = new ConcurrentLinkedQueue[String]()
   val arduinoBuffer = new ConcurrentLinkedQueue[String]()
+
+  val fakeAndroid = sys.env.get("FAKE_ANDROID").isDefined
 
   def send(msg: RpiMessage): Unit = {
     try {
@@ -45,9 +47,12 @@ class RpiConnection(host: String, port: Int) {
   }
 
   def receiveAndroid: String = {
-//    while (androidBuffer.peek == null) {}
-//    androidBuffer.poll
-    StdIn.readLine
+    if (fakeAndroid) {
+      StdIn.readLine
+    } else {
+      while (androidBuffer.peek == null) {}
+      androidBuffer.poll
+    }
   }
 
   def receiveArduino: String = {
@@ -73,6 +78,8 @@ class RpiConnection(host: String, port: Int) {
     }
   }
   thread.start()
+
+  println("RPI is connected!")
 }
 
 object RpiConnection {
