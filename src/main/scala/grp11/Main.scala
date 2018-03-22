@@ -33,8 +33,14 @@ object Tmp {
       if (androidSignal == exploreSignal && !explorationDone) {
         explorationDone = true
         robot = new RealRobot(rpiConnection, server.forwarder)
-        val explorer = new WallHugging(robot)
-        //        val explorer = new NearestHelpfulCell(robot)
+
+        val algo = sys.env.get("ALGO").getOrElse(0)
+        val explorer = if (algo == 1) {
+          new NearestHelpfulCell(robot)
+        } else {
+          new WallHugging(robot)
+        }
+
         println("starting real exploration")
         val start = System.currentTimeMillis
         while (!explorer.finished) {
@@ -62,9 +68,9 @@ object Tmp {
         println("finished calculation")
         val moves = Utils.path2Moves(path)
         println("finished getting moves")
-//        moves.foreach { move =>
-//          robot.move(move)
-//        }
+        //moves.foreach { move =>
+        //  robot.move(move)
+        //}
         val msg = moves.map {
           case Forward => "F"
           case TurnRight => "R"
