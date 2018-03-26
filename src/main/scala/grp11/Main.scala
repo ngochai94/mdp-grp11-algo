@@ -1,29 +1,38 @@
 package grp11
 
 import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
-import grp11.geometry.{Cell, CellState, Maze}
+import grp11.geometry.Cell
 import grp11.connection._
 import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
-import grp11.robot.{RealRobot, Sensor, VirtualRobot}
+import grp11.robot.RealRobot
 import grp11.utils.Utils
 
 import scala.io.StdIn
 
 
 object Main extends App {
-  Tmp.realRun
-//  Tmp.testWS
-//  Tmp.testConnectRpi()
+  val task = sys.env.getOrElse("TASK", "default")
+  val fakeAndroid = sys.env.get("FAKE_ANDROID").isDefined
+  val algo = sys.env.getOrElse("ALGO", "0").toInt
+  val burst = sys.env.get("BURST").isDefined
+
+  if (task == "simulation") {
+    TaskRunner.testWS()
+  } else if (task == "manual") {
+    TaskRunner.testConnectRpi(burst)
+  } else {
+    TaskRunner.realRun(fakeAndroid, algo, burst)
+  }
 }
 
-object Tmp {
+object TaskRunner {
   val exploreSignal = "a"
   val shortestPathSignal = "b"
   val wayPointSignal = "c"
 
-  def realRun(): Unit = {
+  def realRun(fakeAndroid: Boolean, algo: Int, burst: Boolean): Unit = {
     val server = new WebSocketServer
-    val rpiConnection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
+    val rpiConnection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort, fakeAndroid)
     var robot = new RealRobot(rpiConnection, server.forwarder)
     var wayPoint = Cell(2, 2)
     var explorationDone = false
@@ -34,7 +43,6 @@ object Tmp {
         explorationDone = true
         robot = new RealRobot(rpiConnection, server.forwarder)
 
-        val algo = sys.env.get("ALGO").getOrElse(0)
         val explorer = if (algo == 1) {
           new NearestHelpfulCell(robot)
         } else {
@@ -65,12 +73,7 @@ object Tmp {
           robot.getTurnCost,
           Some(wayPoint)
         )
-        println("finished calculation")
         val moves = Utils.path2Moves(path)
-        println("finished getting moves")
-        //moves.foreach { move =>
-        //  robot.move(move)
-        //}
         val msg = moves.map {
           case Forward => "F"
           case TurnRight => "R"
@@ -102,7 +105,7 @@ object Tmp {
     }
   }
 
-  def testConnectRpi(): Unit = {
+  def testConnectRpi(burst: Boolean): Unit = {
     val connection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
     val thread = new Thread {
       override def run(): Unit = {
@@ -115,8 +118,16 @@ object Tmp {
     thread.start()
     while (true) {
       val msg = StdIn.readLine()
-      connection.send(AndroidMessage(msg))
-      connection.send(ArduinoMessage(msg))
+      if (burst) {
+        for {
+          c <- msg
+        } {
+          connection.send(ArduinoMessage("" + c))
+          Thread.sleep(100)
+        }
+      } else {
+        connection.send(ArduinoMessage(msg))
+      }
     }
   }
 }

@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import scala.io.StdIn
 
-class RpiConnection(host: String, port: Int) {
+class RpiConnection(host: String, port: Int, fakeAndroid: Boolean = false) {
   var s = new Socket(InetAddress.getByName(host), port)
   val in = new DataInputStream(s.getInputStream)
   val out = new PrintStream(s.getOutputStream)
@@ -14,7 +14,6 @@ class RpiConnection(host: String, port: Int) {
   val androidBuffer = new ConcurrentLinkedQueue[String]()
   val arduinoBuffer = new ConcurrentLinkedQueue[String]()
 
-  val fakeAndroid = sys.env.get("FAKE_ANDROID").isDefined
 
   def send(msg: RpiMessage): Unit = {
     try {
