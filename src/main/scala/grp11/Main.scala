@@ -4,7 +4,7 @@ import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
 import grp11.geometry.Cell
 import grp11.connection._
 import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
-import grp11.robot.RealRobot
+import grp11.robot.{Move, RealRobot}
 import grp11.utils.Utils
 
 import scala.io.StdIn
@@ -46,24 +46,23 @@ object TaskRunner {
         val explorer = if (algo == 1) {
           new NearestHelpfulCell(robot)
         } else {
-          new WallHugging(robot)
+          new WallHugging(robot, burst = burst)
         }
 
         println("starting real exploration")
         val start = System.currentTimeMillis
-        while (!explorer.finished) {
-          for {
-            move <- explorer.step
-          } {
-            robot.move(move)
-          }
-        }
+
+        Iterator.continually{
+          robot.move(explorer.step)
+        }.takeWhile(_ => !explorer.finished)
+          .toList
+
         val elapsed = (System.currentTimeMillis - start) / 1000
         rpiConnection.send(AndroidMessage(AndroidExplorationTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
         println(robot.getPerceivedMaze.encodeExplored)
         println(robot.getPerceivedMaze.encodeState)
-        println(s"finished in $elapsed seconds")
-        rpiConnection.send(ArduinoMessage("C")) // calibrate after exploration
+        println(s"finished in ${elapsed / 60}m ${elapsed % 60}s")
+        rpiConnection.send(ArduinoMessage("RRRR")) // calibrate after exploration
       } else if (androidSignal == shortestPathSignal) {
         println(s"starting real shortest path with waypoint = $wayPoint")
         val start = System.currentTimeMillis
@@ -75,9 +74,9 @@ object TaskRunner {
         )
         val moves = Utils.path2Moves(path)
         val msg = moves.map {
-          case Forward => "F"
-          case TurnRight => "R"
-          case TurnLeft => "L"
+          case Forward => RealRobot.goStraightCommand
+          case TurnRight => RealRobot.turnRightCommand
+          case TurnLeft => RealRobot.turnLeftCommand
         }.mkString
         println(s"Sending bulk msg $msg")
         rpiConnection.send(ArduinoMessage(msg))

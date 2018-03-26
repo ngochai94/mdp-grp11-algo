@@ -42,18 +42,18 @@ class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit:
         .minBy(_._2._1)._1
       val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
       val moves = Utils.path2Moves(path)
-      List(moves.head)
+      moves
     } else {
       val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
       val position = RobotPosition(Cell(2, 2), Orientation.Up)
       val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, position)
       val moves = Utils.path2Moves(path)
-      List(moves.head)
+      moves
     }
   }
 }
 
-class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
+class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000, burst: Boolean = false)
   extends Explorer(robot, coverageLimit, timeLimit) {
 
   private[this] var looped = false
@@ -76,17 +76,32 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
           val target = targets.minBy(_._2._1)._1
           val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
           val moves = Utils.path2Moves(path)
-          List(moves.head)
+          moves
         }
       } else {
         val position = robot.getPosition
         visited(position) = true
-        if (robot.getPerceivedMaze.isValidPosition(position.applyMove(TurnLeft).applyMove(Forward))) {
-          List(TurnLeft, Forward)
-        } else if (robot.getPerceivedMaze.isValidPosition(position.applyMove(Forward))) {
-          List(Forward)
+
+        def getSingleMove(pos: RobotPosition): List[Move] = {
+          if (robot.getPerceivedMaze.isValidPosition(pos.applyMove(TurnLeft).applyMove(Forward))) {
+            List(TurnLeft, Forward)
+          } else if (robot.getPerceivedMaze.isValidPosition(pos.applyMove(Forward))) {
+            List(Forward)
+          } else {
+            List(TurnRight)
+          }
+        }
+
+        if (!burst) {
+          getSingleMove(position)
         } else {
-          List(TurnRight)
+          val preMoves = Iterator.iterate((List[Move](), position)) { case (_, pos) =>
+            val moves = getSingleMove(pos)
+            (moves, pos.applyMoves(moves))
+          }.takeWhile(x => !robot.getPerceivedMaze.isHelpfulPosition(x._2, robot.getSensors))
+            .flatMap(_._1)
+            .toList
+          preMoves ++ getSingleMove(position.applyMoves(preMoves))
         }
       }
     } else {
@@ -94,7 +109,7 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
       val position = RobotPosition(Cell(2, 2), Orientation.Up)
       val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, position)
       val moves = Utils.path2Moves(path)
-      List(moves.head)
+      moves
     }
   }
 }

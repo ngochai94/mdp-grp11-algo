@@ -67,17 +67,19 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
     }
   }
 
-  override def move(move: Move): Unit = {
+  override def move(moves: List[Move]): Unit = {
     //StdIn.readLine
-    position = position.applyMove(move)
+    position = position.applyMoves(moves)
     if (!perceivedMaze.isValidPosition(position)) {
       throw new Exception(s"move to an invalid position $position")
     }
-    move match {
-      case TurnLeft => connection.send(ArduinoMessage(turnLeftCommand))
-      case TurnRight => connection.send(ArduinoMessage(turnRightCommand))
-      case Forward => connection.send(ArduinoMessage(goStraightCommand))
-    }
+    val arduinoMessage = moves.map {
+      case TurnLeft => turnLeftCommand
+      case TurnRight => turnRightCommand
+      case Forward => goStraightCommand
+    }.mkString
+    connection.send(ArduinoMessage(arduinoMessage))
+
     forwarder ! FwUpdate(snapshot)
     forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(position, perceivedMaze))
 

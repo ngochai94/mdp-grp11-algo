@@ -10,6 +10,12 @@ case class RobotPosition(center: Cell, orientation: Orientation) {
     case TurnRight => RobotPosition(center, orientation.turnRight)
   }
 
+  def applyMoves(moves: List[Move]): RobotPosition = {
+    moves.foldLeft(this) { (position, move) =>
+      position.applyMove(move)
+    }
+  }
+
   def contains(cell: Cell): Boolean = {
     Math.abs(cell.x - center.x) <= 1 && Math.abs(cell.y - center.y) <= 1
   }

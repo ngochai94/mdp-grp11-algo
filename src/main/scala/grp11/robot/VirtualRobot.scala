@@ -25,12 +25,13 @@ class VirtualRobot(finalMaze: Maze, sensors: List[Sensor], moveTime: Int, turnTi
     }.foreach(cell => perceivedMaze.setState(cell, finalMaze.getState(cell)))
   }
 
-  override def move(move: Move): Unit = {
-    position = position.applyMove(move)
+  override def move(moves: List[Move]): Unit = {
+    position = position.applyMoves(moves)
     if (!finalMaze.isValidPosition(position)) {
       throw new Exception("move to a invalid position")
     }
-    move match {
+
+    moves.foreach {
       case Move.Forward => Thread.sleep(moveTime)
       case _ => Thread.sleep(turnTime)
     }

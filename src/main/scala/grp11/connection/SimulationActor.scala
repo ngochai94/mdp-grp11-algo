@@ -28,8 +28,7 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
             case Forward => moveCnt = moveCnt + 1
             case _ => turnCnt = turnCnt + 1
           }
-          robot.move(move)
-          robot.sense()
+          robot.move(List(move))
           forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(robot.getPosition, robot.getPerceivedMaze))
         }
       }
@@ -53,7 +52,7 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
       } else {
         val moves = Utils.path2Moves(path)
         moves.foreach { move =>
-          robot.move(move)
+          robot.move(List(move))
           forwarder ! FwMessage(
             snapshot,
             ClientBoardRepr.toJson(robot.getPosition, robot.getFinalMaze, path.map(_.center), wayPoint.toList)
