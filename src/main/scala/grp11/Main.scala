@@ -4,7 +4,7 @@ import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
 import grp11.geometry.Cell
 import grp11.connection._
 import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
-import grp11.robot.{Move, RealRobot}
+import grp11.robot.RealRobot
 import grp11.utils.Utils
 
 import scala.io.StdIn
@@ -29,18 +29,19 @@ object TaskRunner {
   val exploreSignal = "a"
   val shortestPathSignal = "b"
   val wayPointSignal = "c"
+  val restartSignal = "d"
 
   def realRun(fakeAndroid: Boolean, algo: Int, burst: Boolean): Unit = {
     val server = new WebSocketServer
     val rpiConnection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort, fakeAndroid)
     var robot = new RealRobot(rpiConnection, server.forwarder)
     var wayPoint = Cell(2, 2)
-    var explorationDone = false
+    var blockExploration = false
 
     while (true) {
       val androidSignal = rpiConnection.receiveAndroid
-      if (androidSignal == exploreSignal && !explorationDone) {
-        explorationDone = true
+      if (androidSignal == exploreSignal && !blockExploration) {
+        blockExploration = true
         robot = new RealRobot(rpiConnection, server.forwarder)
 
         val explorer = if (algo == 1) {
@@ -58,14 +59,19 @@ object TaskRunner {
           .toList
 
         val elapsed = (System.currentTimeMillis - start) / 1000
-        rpiConnection.send(AndroidMessage(AndroidExplorationTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
         println(robot.getPerceivedMaze.encodeExplored)
         println(robot.getPerceivedMaze.encodeState)
         println(s"finished in ${elapsed / 60}m ${elapsed % 60}s")
+
         rpiConnection.send(ArduinoMessage("RRRR")) // calibrate after exploration
+        rpiConnection.send(AndroidMessage(AndroidBoardRepr.toJson(
+          robot.getPerceivedMaze.getAndroidMap(robot.getPosition),
+          robot.getPerceivedMaze.encodeExplored,
+          robot.getPerceivedMaze.encodeState
+        )))
+
       } else if (androidSignal == shortestPathSignal) {
         println(s"starting real shortest path with waypoint = $wayPoint")
-        val start = System.currentTimeMillis
         val path = Dijkstra(robot.getPerceivedMaze,
           robot.getPosition,
           robot.getPerceivedMaze.getStop,
@@ -80,15 +86,18 @@ object TaskRunner {
         }.mkString
         println(s"Sending bulk msg $msg")
         rpiConnection.send(ArduinoMessage(msg))
-        val elapsed = (System.currentTimeMillis - start) / 1000
-        rpiConnection.send(AndroidMessage(AndroidShortestPathTimeRepr.toJson(s"${elapsed / 60}m ${elapsed % 60}s")))
         s"Finished shortest path after ${moves.length} moves"
+
       } else if (androidSignal.startsWith(wayPointSignal)) {
         val coordinates = androidSignal.substring(wayPointSignal.length + 1, androidSignal.length - 1)
           .split(", ").map(_.toInt)
         val x = 1 + coordinates.head
         val y = 20 - coordinates.tail.head
         wayPoint = Cell(x, y)
+
+      }else if (androidSignal == restartSignal) {
+        blockExploration = false
+
       } else {
         println("Forwarding msg to arduino...")
         rpiConnection.send(ArduinoMessage(androidSignal))

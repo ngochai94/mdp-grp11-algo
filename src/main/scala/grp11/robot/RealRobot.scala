@@ -83,8 +83,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
     forwarder ! FwUpdate(snapshot)
     forwarder ! FwMessage(snapshot, ClientBoardRepr.toJson(position, perceivedMaze))
 
-    val androidMessage = AndroidBoardRepr.toJson(
-      perceivedMaze.getAndroidMap(position), perceivedMaze.encodeExplored, perceivedMaze.encodeState)
+    val androidMessage = AndroidBoardRepr.toJson(perceivedMaze.getAndroidMap(position))
     connection.send(AndroidMessage(androidMessage))
   }
 
