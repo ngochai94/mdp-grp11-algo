@@ -101,7 +101,10 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
           }.takeWhile(x => !robot.getPerceivedMaze.isHelpfulPosition(x._2, robot.getSensors))
             .flatMap(_._1)
             .toList
-          preMoves ++ getSingleMove(position.applyMoves(preMoves))
+          val target = position.applyMoves(preMoves)
+          val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
+          val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
+          Utils.path2Moves(path) ++ getSingleMove(position.applyMoves(preMoves))
         }
       }
     } else {

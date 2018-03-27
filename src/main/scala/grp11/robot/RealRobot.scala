@@ -90,7 +90,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
 
   override def getPerceivedMaze: Maze = perceivedMaze
 
-  override def getTurnCost: Double = 1.0
+  override def getTurnCost: Double = 1.5
 }
 
 object RealRobot {

@@ -117,7 +117,7 @@ object TaskRunner {
     thread.start()
     while (true) {
       val msg = StdIn.readLine()
-      if (burst) {
+      if (!burst) {
         for {
           c <- msg
         } {
