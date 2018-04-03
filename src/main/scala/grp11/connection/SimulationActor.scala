@@ -1,7 +1,7 @@
 package grp11.connection
 
 import akka.actor.{Actor, ActorRef}
-import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
+import grp11.algo.{Dijkstra, Hybrid, NearestHelpfulCell, WallHugging}
 import grp11.geometry.Cell
 import grp11.robot.Move.Forward
 import grp11.robot.VirtualRobot
@@ -17,6 +17,7 @@ class SimulationActor(snapshot: Int, forwarder: ActorRef, robot: VirtualRobot) e
       val explorer = explorerName match {
         case "wall" => new WallHugging(robot, coverageLimit, timeLimit)
         case "near" => new NearestHelpfulCell(robot, coverageLimit, timeLimit)
+        case "hybrid" => new Hybrid(robot, coverageLimit, timeLimit)
         case _ => throw new Exception(s"Unknown explorerName = $explorerName")
       }
       println(s"Starting exploration with coverageLimit = $coverageLimit% and timeLimit = ${timeLimit / 1000.0}s")

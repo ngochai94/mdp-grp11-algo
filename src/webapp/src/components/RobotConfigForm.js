@@ -53,6 +53,7 @@ export default class RobotConfigForm extends Component {
           <Radio.Group value={this.state.explorer} onChange={this._onSelectExplorer} className="setting">
             <Radio.Button value="wall">Wall Hugging</Radio.Button>
             <Radio.Button value="near">Nearest Cell</Radio.Button>
+            <Radio.Button value="hybrid">Hybrid</Radio.Button>
           </Radio.Group>
           <Button className="setting" onClick={this._onClickExplore} type="primary">Explore</Button>
         </div>
