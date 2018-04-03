@@ -8,7 +8,7 @@ import grp11.utils.Utils
 import scala.collection.mutable
 
 sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: Long) {
-  private[algo] val visited = mutable.HashMap[RobotPosition, Boolean]()
+  private[algo] val visited = mutable.HashMap[RobotPosition, Int]()
   private[this] val height = robot.getPerceivedMaze.getHeight
   private[this] val width = robot.getPerceivedMaze.getWidth
   private[algo] var forcedStop = false
@@ -18,7 +18,7 @@ sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: L
     col <- 1 to width
     orientation <- Orientation.all
   } {
-    visited(RobotPosition(Cell(col, row), orientation)) = false
+    visited(RobotPosition(Cell(col, row), orientation)) = 0
   }
 
   private[this] val start = System.currentTimeMillis()
@@ -26,23 +26,35 @@ sealed abstract class Explorer(robot: Robot, coverageLimit: Double, timeLimit: L
     System.currentTimeMillis() - start >= timeLimit
   def finished: Boolean = shouldFinish && robot.getPosition == RobotPosition(Cell(2, 2), Orientation.Up)
 
-  def step: List[Move]
-}
+  def getSingleMove(pos: RobotPosition): List[Move] = {
+    if (robot.getPerceivedMaze.isValidPosition(pos.applyMove(TurnLeft).applyMove(Forward))) {
+      List(TurnLeft, Forward)
+    } else if (robot.getPerceivedMaze.isValidPosition(pos.applyMove(Forward))) {
+      List(Forward)
+    } else {
+      List(TurnRight)
+    }
+  }
 
-class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
-  extends Explorer(robot, coverageLimit, timeLimit) {
+  def stepToNearestUnexploredArea(): List[Move] = {
+    val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
+    val targets = distanceMap.filterKeys(position => visited(position) == 0)
+      .filterKeys(position => robot.getPerceivedMaze.isHelpfulPosition(position, robot.getSensors))
+    val target = if (targets.isEmpty) {
+      forcedStop = true
+      RobotPosition(Cell(2, 2), Orientation.Up)
+    } else {
+      targets.minBy(_._2._1)._1
+    }
+    val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
+    Utils.path2Moves(path)
+  }
 
   def step: List[Move] = {
+    visited(robot.getPosition) = visited(robot.getPosition) + 1
     robot.sense()
     if (!shouldFinish) {
-      visited(robot.getPosition) = true
-      val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
-      val target = distanceMap.filterKeys(position => !visited(position))
-        .filterKeys(position => robot.getPerceivedMaze.isHelpfulPosition(position, robot.getSensors))
-        .minBy(_._2._1)._1
-      val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
-      val moves = Utils.path2Moves(path)
-      moves
+      explore()
     } else {
       val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
       val position = RobotPosition(Cell(2, 2), Orientation.Up)
@@ -51,6 +63,14 @@ class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit:
       moves
     }
   }
+
+  def explore(): List[Move]
+}
+
+class NearestHelpfulCell(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
+  extends Explorer(robot, coverageLimit, timeLimit) {
+
+  def explore(): List[Move] = stepToNearestUnexploredArea()
 }
 
 class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000, burst: Boolean = false)
@@ -58,61 +78,64 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
 
   private[this] var looped = false
 
-  def step: List[Move] = {
-    robot.sense()
-    if (visited(robot.getPosition)) {
+  def explore(): List[Move] = {
+    if (visited(robot.getPosition) > 1) {
       looped = true
     }
-    if (!shouldFinish) {
-      if (looped) {
-        visited(robot.getPosition) = true
-        val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
-        val targets = distanceMap.filterKeys(position => !visited(position))
-          .filterKeys(position => robot.getPerceivedMaze.isHelpfulPosition(position, robot.getSensors))
-        if (targets.isEmpty) {
-          forcedStop = true
-          Nil
-        } else {
-          val target = targets.minBy(_._2._1)._1
-          val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
-          val moves = Utils.path2Moves(path)
-          moves
-        }
-      } else {
-        val position = robot.getPosition
-        visited(position) = true
-
-        def getSingleMove(pos: RobotPosition): List[Move] = {
-          if (robot.getPerceivedMaze.isValidPosition(pos.applyMove(TurnLeft).applyMove(Forward))) {
-            List(TurnLeft, Forward)
-          } else if (robot.getPerceivedMaze.isValidPosition(pos.applyMove(Forward))) {
-            List(Forward)
-          } else {
-            List(TurnRight)
-          }
-        }
-
-        if (!burst) {
-          getSingleMove(position)
-        } else {
-          val preMoves = Iterator.iterate((List[Move](), position)) { case (_, pos) =>
-            val moves = getSingleMove(pos)
-            (moves, pos.applyMoves(moves))
-          }.takeWhile(x => !robot.getPerceivedMaze.isHelpfulPosition(x._2, robot.getSensors))
-            .flatMap(_._1)
-            .toList
-          val target = position.applyMoves(preMoves)
-          val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
-          val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
-          Utils.path2Moves(path) ++ getSingleMove(position.applyMoves(preMoves))
-        }
-      }
+    if (looped) {
+      stepToNearestUnexploredArea()
     } else {
-      val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
-      val position = RobotPosition(Cell(2, 2), Orientation.Up)
-      val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, position)
-      val moves = Utils.path2Moves(path)
-      moves
+      val position = robot.getPosition
+      if (!burst) {
+        getSingleMove(position)
+      } else {
+        val preMoves = Iterator.iterate((List[Move](), position)) { case (_, pos) =>
+          val moves = getSingleMove(pos)
+          (moves, pos.applyMoves(moves))
+        }.takeWhile(x => !robot.getPerceivedMaze.isHelpfulPosition(x._2, robot.getSensors))
+          .flatMap(_._1)
+          .toList
+        val target = position.applyMoves(preMoves)
+        val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
+        val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
+        Utils.path2Moves(path) ++ getSingleMove(position.applyMoves(preMoves))
+      }
+    }
+  }
+}
+
+class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
+  extends Explorer(robot, coverageLimit, timeLimit) {
+
+  private[this] var hugging = true
+
+  def explore(): List[Move] = {
+    robot.sense()
+    println(hugging)
+    if (!hugging) {
+      stepToNearestUnexploredArea()
+    } else {
+      val position = robot.getPosition
+      val preMoves = Iterator.iterate((List[Move](), position)) { case (_, pos) =>
+        val moves = getSingleMove(pos)
+        (moves, pos.applyMoves(moves))
+      }.takeWhile(x => !robot.getPerceivedMaze.isHelpfulPosition(x._2, robot.getSensors))
+        .take(10)
+        .flatMap(_._1)
+        .take(10)
+        .toList
+
+      println(preMoves.length)
+      if (preMoves.lengthCompare(10) == 0) {
+        hugging = false
+        println("Switching mode...")
+        stepToNearestUnexploredArea()
+      } else {
+        val target = position.applyMoves(preMoves)
+        val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
+        val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
+        Utils.path2Moves(path) ++ getSingleMove(position.applyMoves(preMoves))
+      }
     }
   }
 }

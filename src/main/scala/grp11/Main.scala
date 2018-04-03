@@ -1,6 +1,6 @@
 package grp11
 
-import grp11.algo.{Dijkstra, NearestHelpfulCell, WallHugging}
+import grp11.algo.{Dijkstra, Hybrid, NearestHelpfulCell, WallHugging}
 import grp11.geometry.Cell
 import grp11.connection._
 import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
@@ -46,6 +46,8 @@ object TaskRunner {
 
         val explorer = if (algo == 1) {
           new NearestHelpfulCell(robot)
+        } else if (algo == 2) {
+          new Hybrid(robot)
         } else {
           new WallHugging(robot, burst = burst)
         }
