@@ -104,13 +104,12 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
   }
 }
 
-class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000)
+class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000, switchThreshold: Int = 15)
   extends Explorer(robot, coverageLimit, timeLimit) {
 
   private[this] var hugging = true
 
   def explore(): List[Move] = {
-    robot.sense()
     println(hugging)
     if (!hugging) {
       stepToNearestUnexploredArea()
@@ -120,9 +119,9 @@ class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 3600
         val moves = getSingleMove(pos)
         (moves, pos.applyMoves(moves))
       }.takeWhile(x => !robot.getPerceivedMaze.isHelpfulPosition(x._2, robot.getSensors))
-        .take(10)
+        .take(switchThreshold)
         .flatMap(_._1)
-        .take(10)
+        .take(switchThreshold)
         .toList
 
       println(preMoves.length)

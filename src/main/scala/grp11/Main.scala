@@ -98,6 +98,7 @@ object TaskRunner {
         wayPoint = Cell(x, y)
 
       }else if (androidSignal == restartSignal) {
+        println("Resetting...")
         blockExploration = false
 
       } else {

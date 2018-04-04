@@ -47,13 +47,14 @@ class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
   def isHelpfulPosition(position: RobotPosition, sensors: List[Sensor]): Boolean = {
     if (!isValidPosition(position)) false
     else {
-      val cellsUnder = for {
-        sensor <- sensors
-        (sensorCell, orientation) = sensor.getState(position)
-        cell = sensorCell + orientation * 1
-        if isInside(cell)
-      } yield cells(cell)
-      cellsUnder.contains(Unknown)
+      sensors.flatMap { sensor =>
+        val (pos, orientation) = sensor.getState(position)
+        sensor.range
+          .map(distance => pos + orientation * distance)
+          .filter(isInside)
+          .map(cells(_))
+          .takeWhile(_ != Blocked)
+      }.contains(Unknown)
     }
   }
 
