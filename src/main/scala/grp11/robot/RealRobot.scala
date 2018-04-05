@@ -43,12 +43,12 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
             }
           }
         } else { // handle long sensor differently due to lower accuracy
-          if (distance == 0 || distance > 4) {
-            List(1, 2, 3, 4)
+          val trustRange = 4
+          if (distance == 0 || distance > trustRange) {
+            (1 to trustRange).toList
               .map(distance => pos + orientation * distance)
               .filter(perceivedMaze.containsCell)
               .foreach(cell => perceivedMaze.setState(cell, CellState.Empty))
-          //} else if (distance == 3 || distance == 4) {
           } else {
             (1 until distance)
               .toList

@@ -13,6 +13,7 @@ import scala.io.StdIn
 object Main extends App {
   val task = sys.env.getOrElse("TASK", "default")
   val fakeAndroid = sys.env.get("FAKE_ANDROID").isDefined
+  val fakeRpi = sys.env.get("FAKE_RPI").isDefined
   val algo = sys.env.getOrElse("ALGO", "0").toInt
   val burst = sys.env.get("BURST").isDefined
 
@@ -21,7 +22,7 @@ object Main extends App {
   } else if (task == "manual") {
     TaskRunner.testConnectRpi(burst)
   } else {
-    TaskRunner.realRun(fakeAndroid, algo, burst)
+    TaskRunner.realRun(fakeAndroid, fakeRpi, algo, burst)
   }
 }
 
@@ -31,9 +32,14 @@ object TaskRunner {
   val wayPointSignal = "c"
   val restartSignal = "d"
 
-  def realRun(fakeAndroid: Boolean, algo: Int, burst: Boolean): Unit = {
+  def realRun(fakeAndroid: Boolean, fakeRpi: Boolean, algo: Int, burst: Boolean): Unit = {
     val server = new WebSocketServer
-    val rpiConnection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort, fakeAndroid)
+    println(fakeRpi)
+    val rpiConnection = if (fakeRpi) {
+      new RpiConnection(RpiConnection.LocalHost, RpiConnection.DefaultPort, fakeAndroid)
+    } else {
+      new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort, fakeAndroid)
+    }
     var robot = new RealRobot(rpiConnection, server.forwarder)
     var wayPoint = Cell(2, 2)
     var blockExploration = false

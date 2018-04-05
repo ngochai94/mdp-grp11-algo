@@ -83,6 +83,7 @@ class RpiConnection(host: String, port: Int, fakeAndroid: Boolean = false) {
 
 object RpiConnection {
   val DefaultHost = "192.168.200.11"
+  val LocalHost = "127.0.0.1"
   val DefaultPort = 8080
   val MaxLength = 1024
 }
