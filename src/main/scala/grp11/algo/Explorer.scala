@@ -110,10 +110,12 @@ class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 3600
   private[this] var hugging = true
 
   def explore(): List[Move] = {
+    println("==========================")
     println(hugging)
     if (!hugging) {
       stepToNearestUnexploredArea()
     } else {
+      println(robot.getPerceivedMaze.draw())
       val position = robot.getPosition
       val preMoves = Iterator.iterate((List[Move](), position)) { case (_, pos) =>
         val moves = getSingleMove(pos)
@@ -125,7 +127,7 @@ class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 3600
         .toList
 
       println(preMoves.length)
-      if (preMoves.lengthCompare(10) == 0) {
+      if (preMoves.lengthCompare(switchThreshold) == 0) {
         hugging = false
         println("Switching mode...")
         stepToNearestUnexploredArea()
@@ -133,6 +135,8 @@ class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 3600
         val target = position.applyMoves(preMoves)
         val distanceMap = Dijkstra.getDistanceMap(robot.getPerceivedMaze, robot.getPosition, robot.getTurnCost)
         val path = Dijkstra.getPathWithDistanceMap(distanceMap, robot.getPosition, target)
+        println(s"target = $target")
+        println(s"path = $path")
         Utils.path2Moves(path) ++ getSingleMove(position.applyMoves(preMoves))
       }
     }

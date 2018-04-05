@@ -34,7 +34,6 @@ object TaskRunner {
 
   def realRun(fakeAndroid: Boolean, fakeRpi: Boolean, algo: Int, burst: Boolean): Unit = {
     val server = new WebSocketServer
-    println(fakeRpi)
     val rpiConnection = if (fakeRpi) {
       new RpiConnection(RpiConnection.LocalHost, RpiConnection.DefaultPort, fakeAndroid)
     } else {
@@ -71,7 +70,7 @@ object TaskRunner {
         println(robot.getPerceivedMaze.encodeState)
         println(s"finished in ${elapsed / 60}m ${elapsed % 60}s")
 
-        rpiConnection.send(ArduinoMessage("RRRR")) // calibrate after exploration
+        rpiConnection.send(ArduinoMessage("C"))
         rpiConnection.send(AndroidMessage(AndroidBoardRepr.toJson(
           robot.getPerceivedMaze.getAndroidMap(robot.getPosition),
           robot.getPerceivedMaze.encodeExplored,
