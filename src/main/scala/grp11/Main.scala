@@ -72,7 +72,7 @@ object TaskRunner {
         println(robot.getPerceivedMaze.encodeState)
         println(s"finished in ${elapsed / 60}m ${elapsed % 60}s")
 
-        rpiConnection.send(ArduinoMessage("C"))
+        rpiConnection.send(ArduinoMessage(RealRobot.stopCalibration))
         rpiConnection.send(AndroidMessage(AndroidBoardRepr.toJson(
           robot.getPerceivedMaze.getAndroidMap(robot.getPosition),
           robot.getPerceivedMaze.encodeExplored,

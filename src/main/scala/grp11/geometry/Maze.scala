@@ -6,7 +6,7 @@ import grp11.utils.Utils
 
 import scala.collection.mutable
 
-class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
+class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int, knownEmptyCells: List[Cell] = Nil) {
   def containsCell(cell: Cell): Boolean = cells.contains(cell)
 
   def getState(cell: Cell): CellState = cells(cell)
@@ -19,7 +19,7 @@ class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
     if (cells(cell) != Unknown && cells(cell) != cellState) {
       println(s"Cell $cell was previously ${cells(cell)} and is now set to $cellState")
     }
-    if ((isInsideEndArea(cell) || isInsideEndArea(cell)) && cellState == Blocked) {
+    if (isKnownEmpty(cell) && cellState == Blocked) {
       println("Attempting to modify start or end area")
       cells(cell) = Empty
     } else if (cells(cell) != Empty) { // always trust the first read of empty cell
@@ -137,20 +137,8 @@ class Maze(cells: mutable.HashMap[Cell, CellState], height: Int, width: Int) {
     }.mkString("\n")
   }
 
-  private[this] def isInsideStartArea(cell: Cell): Boolean = {
-    val startArea = for {
-      row <- 1 to 3
-      col <- 1 to 3
-    } yield Cell(col, row)
-    startArea.contains(cell)
-  }
-
-  private[this] def isInsideEndArea(cell: Cell): Boolean = {
-    val startArea = for {
-      row <- height - 2 to height
-      col <- width - 2 to width
-    } yield Cell(col, row)
-    startArea.contains(cell)
+  private[this] def isKnownEmpty(cell: Cell): Boolean = {
+    knownEmptyCells.contains(cell)
   }
 }
 
@@ -170,17 +158,22 @@ object Maze {
     }{
       cells(Cell(col, row)) = Unknown
     }
-    // Start and end position is always empty
+    // Start position is always empty
+    for {
+      row <- 1 to 3
+      col <- 1 to 3
+    }{
+      cells(Cell(col, row)) = Empty
+    }
+
     val upLeftConner = if (block1) Nil else List(Cell(2, height - 1))
     val downRightConner = if (block2) Nil else List(Cell(width - 1, 2))
     val centers = List(Cell(2, 2), Cell(width - 1, height - 1)) ++ upLeftConner ++ downRightConner
-    for {
+    val knownEmptyCells = for {
       row <- -1 to 1
       col <- -1 to 1
       center <- centers
-    } {
-      cells(center + Cell(col, row)) = Empty
-    }
-    new Maze(cells, height, width)
+    } yield center + Cell(col, row)
+    new Maze(cells, height, width, knownEmptyCells.toList)
   }
 }

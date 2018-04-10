@@ -5,7 +5,6 @@ import grp11.geometry.{Cell, CellState, Maze}
 import grp11.robot.Move.{Forward, TurnLeft, TurnRight}
 import grp11.robot.Orientation.Up
 
-import scala.io.StdIn
 import scala.util.Random
 
 class RealRobot(connection: RpiConnection, forwarder: ActorRef, block1: Boolean, block2: Boolean) extends Robot {
@@ -97,5 +96,6 @@ object RealRobot {
   val turnLeftCommand = "L"
   val turnRightCommand = "R"
   val goStraightCommand = "F"
+  val stopCalibration = "C"
   val senseResultSeparator = ":"
 }
