@@ -8,9 +8,9 @@ import grp11.robot.Orientation.Up
 import scala.io.StdIn
 import scala.util.Random
 
-class RealRobot(connection: RpiConnection, forwarder: ActorRef) extends Robot {
+class RealRobot(connection: RpiConnection, forwarder: ActorRef, block1: Boolean, block2: Boolean) extends Robot {
   private[this] var position = RobotPosition(Cell(2, 2), Up)
-  private[this] val perceivedMaze = Maze()
+  private[this] val perceivedMaze = Maze(block1, block2)
   private[this] val snapshot = Random.nextInt
   import RealRobot._
 

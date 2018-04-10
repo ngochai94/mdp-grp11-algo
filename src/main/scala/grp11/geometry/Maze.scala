@@ -158,11 +158,11 @@ object Maze {
   val Height = 20
   val Width = 15
 
-  def apply(): Maze = {
-    apply(Height, Width)
+  def apply(block1: Boolean = false, block2: Boolean = false): Maze = {
+    apply(Height, Width, block1, block2)
   }
 
-  def apply(height: Int, width: Int): Maze = {
+  def apply(height: Int, width: Int, block1: Boolean, block2: Boolean): Maze = {
     val cells = mutable.HashMap[Cell, CellState]()
     for {
       row <- 1 to height
@@ -170,24 +170,17 @@ object Maze {
     }{
       cells(Cell(col, row)) = Unknown
     }
-    // Start pos is always empty
+    // Start and end position is always empty
+    val upLeftConner = if (block1) Nil else List(Cell(2, height - 1))
+    val downRightConner = if (block2) Nil else List(Cell(width - 1, 2))
+    val centers = List(Cell(2, 2), Cell(width - 1, height - 1)) ++ upLeftConner ++ downRightConner
     for {
-      row <- 1 to 3
-      col <- 1 to 3
+      row <- -1 to 1
+      col <- -1 to 1
+      center <- centers
     } {
-      cells(Cell(col, row)) = Empty
+      cells(center + Cell(col, row)) = Empty
     }
     new Maze(cells, height, width)
-  }
-
-  def emptyMaze = {
-    val cells = mutable.HashMap[Cell, CellState]()
-    for {
-      row <- 1 to Height
-      col <- 1 to Width
-    } {
-      cells(Cell(col, row)) = Empty
-    }
-    new Maze(cells, Height, Width)
   }
 }
