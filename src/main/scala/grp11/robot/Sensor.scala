@@ -23,6 +23,6 @@ object Sensor {
     Sensor(-1, 1, Up, List(1, 2, 3)), // front left
     Sensor(-1, 1, Left, List(1, 2, 3)), // left front
     Sensor(-1, -1, Left, List(1, 2, 3)), // left back
-    Sensor(1, 1, Right, List(1, 2, 3, 4, 5)) // right
+    Sensor(1, 1, Right, List(1, 2, 3, 4)) // right
   )
 }

@@ -56,7 +56,7 @@ object TaskRunner {
         } else if (algo == 2) {
           new Hybrid(robot)
         } else {
-          new WallHugging(robot, burst = burst)
+          new WallHugging(robot, burst = true)
         }
 
         println("starting real exploration")

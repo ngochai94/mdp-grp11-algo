@@ -104,7 +104,7 @@ class WallHugging(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long =
   }
 }
 
-class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000, switchThreshold: Int = 15)
+class Hybrid(robot: Robot, coverageLimit: Double = 100.0, timeLimit: Long = 360000, switchThreshold: Int = 50)
   extends Explorer(robot, coverageLimit, timeLimit) {
 
   private[this] var hugging = true

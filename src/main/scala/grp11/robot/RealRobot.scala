@@ -42,7 +42,7 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef, block1: Boolean,
             }
           }
         } else { // handle long sensor differently due to lower accuracy
-          val trustRange = 4
+          val trustRange = sensor.range.length
           if (distance == 0 || distance > trustRange) {
             (1 to trustRange).toList
               .map(distance => pos + orientation * distance)
