@@ -146,11 +146,11 @@ object Maze {
   val Height = 20
   val Width = 15
 
-  def apply(block1: Boolean = false, block2: Boolean = false): Maze = {
-    apply(Height, Width, block1, block2)
+  def apply(): Maze = {
+    apply(Height, Width)
   }
 
-  def apply(height: Int, width: Int, block1: Boolean, block2: Boolean): Maze = {
+  def apply(height: Int, width: Int): Maze = {
     val cells = mutable.HashMap[Cell, CellState]()
     for {
       row <- 1 to height
@@ -167,9 +167,7 @@ object Maze {
       cells(Cell(col, row)) = Empty
     }
 
-    val upLeftConner = if (block1) Nil else List(Cell(2, height - 1))
-    val downRightConner = if (block2) Nil else List(Cell(width - 1, 2))
-    val centers = List(Cell(2, 2), Cell(width - 1, height - 1)) ++ upLeftConner ++ downRightConner
+    val centers = List(Cell(2, 2), Cell(width - 1, height - 1), Cell(2, height - 1), Cell(width - 1, 2))
     val knownEmptyCells = for {
       row <- -1 to 1
       col <- -1 to 1

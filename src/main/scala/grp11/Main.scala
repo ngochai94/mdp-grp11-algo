@@ -16,15 +16,13 @@ object Main extends App {
   val fakeRpi = sys.env.get("FAKE_RPI").isDefined
   val algo = sys.env.getOrElse("ALGO", "0").toInt
   val burst = sys.env.get("BURST").isDefined
-  val blockedConner1 = sys.env.get("BLOCK1").isDefined
-  val blockedConner2 = sys.env.get("BLOCK2").isDefined
 
   if (task == "simulation") {
     TaskRunner.testWS()
   } else if (task == "manual") {
     TaskRunner.testConnectRpi(burst)
   } else {
-    TaskRunner.realRun(fakeAndroid, fakeRpi, algo, burst, blockedConner1, blockedConner2)
+    TaskRunner.realRun(fakeAndroid, fakeRpi, algo)
   }
 }
 
@@ -34,31 +32,35 @@ object TaskRunner {
   val wayPointSignal = "c"
   val restartSignal = "d"
 
-  def realRun(fakeAndroid: Boolean, fakeRpi: Boolean, algo: Int, burst: Boolean, block1: Boolean, block2: Boolean): Unit = {
+  def realRun(fakeAndroid: Boolean, fakeRpi: Boolean, algo: Int): Unit = {
     val server = new WebSocketServer
-    val rpiConnection = if (fakeRpi) {
-      new RpiConnection(RpiConnection.LocalHost, RpiConnection.DefaultPort, fakeAndroid)
-    } else {
-      new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort, fakeAndroid)
-    }
-    var robot = new RealRobot(rpiConnection, server.forwarder, block1, block2)
-    var wayPoint = Cell(2, 2)
-    var blockExploration = false
 
-    while (true) {
-      val androidSignal = rpiConnection.receiveAndroid
-      if (androidSignal == exploreSignal && !blockExploration) {
-        blockExploration = true
-        robot = new RealRobot(rpiConnection, server.forwarder, block1, block2)
+    val rpiConnection = if (fakeRpi) new RpiConnection(RpiConnection.LocalHost, RpiConnection.DefaultPort, fakeAndroid)
+    else new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort, fakeAndroid)
 
-        val explorer = if (algo == 1) {
-          new NearestHelpfulCell(robot)
-        } else if (algo == 2) {
-          new Hybrid(robot)
-        } else {
-          new WallHugging(robot, burst = true)
+    Iterator.iterate((new RealRobot(rpiConnection, server.forwarder), Cell(2, 2), false)) {
+      case (robot, wayPoint, blockExploration) =>
+        process(robot, wayPoint, blockExploration, rpiConnection, server, algo, rpiConnection.receiveAndroid)
+    }.toList
+  }
+
+  private[this] def process(
+    robot: RealRobot,
+    wayPoint: Cell,
+    blockExploration: Boolean,
+    rpiConnection: RpiConnection,
+    server: WebSocketServer,
+    algo: Int,
+    androidSignal: String)
+  : (RealRobot, Cell, Boolean) = {
+    androidSignal match {
+      case `exploreSignal` if !blockExploration =>
+        val robot = new RealRobot(rpiConnection, server.forwarder)
+        val explorer = algo match {
+          case 1 => new NearestHelpfulCell(robot)
+          case 2 => new Hybrid(robot)
+          case _ => new WallHugging(robot, burst = true)
         }
-
         println("starting real exploration")
         val start = System.currentTimeMillis
 
@@ -78,8 +80,9 @@ object TaskRunner {
           robot.getPerceivedMaze.encodeExplored,
           robot.getPerceivedMaze.encodeState
         )))
+        (robot, wayPoint, true)
 
-      } else if (androidSignal == shortestPathSignal) {
+      case `shortestPathSignal` =>
         println(s"starting real shortest path with waypoint = $wayPoint")
         val path = Dijkstra(robot.getPerceivedMaze,
           robot.getPosition,
@@ -95,23 +98,24 @@ object TaskRunner {
         }.mkString
         println(s"Sending bulk msg $msg")
         rpiConnection.send(ArduinoMessage(msg))
-        s"Finished shortest path after ${moves.length} moves"
+        (robot, wayPoint, blockExploration)
 
-      } else if (androidSignal.startsWith(wayPointSignal)) {
+      case _ if androidSignal.startsWith(wayPointSignal) =>
         val coordinates = androidSignal.substring(wayPointSignal.length + 1, androidSignal.length - 1)
           .split(", ").map(_.toInt)
+        // This extra computation arises from the mismatched representation between Algo and Android teams
         val x = 1 + coordinates.head
         val y = 20 - coordinates.tail.head
-        wayPoint = Cell(x, y)
+        (robot, Cell(x, y), blockExploration)
 
-      }else if (androidSignal == restartSignal) {
+      case `restartSignal` =>
         println("Resetting...")
-        blockExploration = false
+        (robot, wayPoint, false)
 
-      } else {
+      case _ =>
         println("Forwarding msg to arduino...")
         rpiConnection.send(ArduinoMessage(androidSignal))
-      }
+        (robot, wayPoint, blockExploration)
     }
   }
 
@@ -125,16 +129,7 @@ object TaskRunner {
 
   def testConnectRpi(burst: Boolean): Unit = {
     val connection = new RpiConnection(RpiConnection.DefaultHost, RpiConnection.DefaultPort)
-    val thread = new Thread {
-      override def run(): Unit = {
-        var received = " "
-        while (received != "") {
-          received = connection.receiveArduino
-        }
-      }
-    }
-    thread.start()
-    while (true) {
+    Iterator.continually{
       val msg = StdIn.readLine()
       if (!burst) {
         for {
@@ -146,6 +141,6 @@ object TaskRunner {
       } else {
         connection.send(ArduinoMessage(msg))
       }
-    }
+    }.toList
   }
 }
