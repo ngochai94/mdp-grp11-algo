@@ -158,6 +158,7 @@ object Maze {
     }{
       cells(Cell(col, row)) = Unknown
     }
+
     // Start position is always empty
     for {
       row <- 1 to 3

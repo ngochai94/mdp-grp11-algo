@@ -67,7 +67,6 @@ class RealRobot(connection: RpiConnection, forwarder: ActorRef, block1: Boolean,
   }
 
   override def move(moves: List[Move]): Unit = {
-    //StdIn.readLine
     position = position.applyMoves(moves)
     if (!perceivedMaze.isValidPosition(position)) {
       throw new Exception(s"move to an invalid position $position")
